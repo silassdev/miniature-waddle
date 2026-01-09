@@ -1,187 +1,132 @@
-'use client';
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useSession, signOut } from 'next-auth/react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FiMenu, FiX, FiGithub, FiUser, FiLogOut } from 'react-icons/fi';
-import ThemeToggle from './ThemeToggle';
+"use client";
+
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiMenu, FiX, FiHeart, FiUser, FiLogOut, FiMessageSquare } from "react-icons/fi";
+import ThemeToggle from "./ThemeToggle";
+import { useChat } from "@/app/components/chat/ChatContext";
 
 export default function Header() {
   const { data: session } = useSession();
+  const { openChat } = useChat();
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 8);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const navItems = [
-    { label: 'Leaderboard', href: '/leaderboard' },
+    { label: "Daily Bread", href: "/daily" },
+    { label: "Prayer Wall", href: "/prayers" },
   ];
 
   return (
-    <header
-      className={`sticky top-0 z-50 transition-all duration-300 backdrop-blur-sm ${isScrolled ? 'bg-white/70 dark:bg-slate-900/70 shadow-sm' : 'bg-transparent'
-        }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Left: Brand */}
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-md flex items-center justify-center bg-black/90 dark:bg-white/90 text-white dark:text-black">
-                {/* Simple mark; replace with SVG if you have one */}
-                <FiGithub className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="font-extrabold text-lg tracking-tight text-slate-900 dark:text-white">
-                  GitBattle
-                </span>
-                <div className="text-[12px] text-slate-500 dark:text-slate-400 -mt-0.5">
-                  Compare. Visualize. Rank.
-                </div>
-              </div>
-            </Link>
+    <header className={`header transition-all duration-300 ${isScrolled ? "shadow-sm" : "bg-transparent border-transparent"}`}>
+      <div className="container flex items-center justify-between h-16">
+        {/* Brand */}
+        <Link href="/" className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-[var(--accent)] text-white shadow-md">
+            <FiHeart className="w-5 h-5 fill-current" />
           </div>
+          <div className="hidden sm:block">
+            <span className="font-bold text-lg tracking-tight block leading-none">ShepherdAI</span>
+            <span className="text-[10px] text-[var(--muted)] font-bold uppercase tracking-widest">Assistant</span>
+          </div>
+        </Link>
 
-          {/* Middle: nav (desktop) */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="relative text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-sky-600 transition-colors"
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-8">
+          {navItems.map((item) => (
+            <Link key={item.href} href={item.href} className="text-sm font-medium text-[var(--muted)] hover:text-[var(--foreground)] transition-colors">
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Right Side Actions */}
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+
+          {/* START CHAT */}
+          <button
+            onClick={openChat}
+            className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--accent)] text-white text-xs font-bold hover:opacity-90 transition"
+          >
+            <FiMessageSquare size={14} />
+            Start Chat
+          </button>
+
+          {session ? (
+            <div className="flex items-center gap-3">
+              {session.user?.image && (
+                <img src={session.user.image} alt="" className="w-8 h-8 rounded-full border border-[var(--card-border)]" />
+              )}
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 text-red-500 text-xs font-bold hover:bg-red-500/20 transition"
               >
-                {item.label}
-                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-sky-600 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-            ))}
-          </nav>
+                <FiLogOut /> Sign Out
+              </button>
+            </div>
+          ) : (
+            <Link href="/login" className="btn-primary text-xs flex items-center gap-2">
+              <FiUser className="w-3 h-3" /> Sign In
+            </Link>
+          )}
 
-          {/* Right: actions */}
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-3">
-              <ThemeToggle />
+          <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)}>
+            {mobileOpen ? <FiX size={22} /> : <FiMenu size={22} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-[var(--card)] border-b border-[var(--card-border)]"
+          >
+            <div className="container py-4 flex flex-col gap-4">
+              {navItems.map((item) => (
+                <Link key={item.href} href={item.href} className="text-sm font-medium py-2" onClick={() => setMobileOpen(false)}>
+                  {item.label}
+                </Link>
+              ))}
+
+              <button
+                onClick={() => {
+                  setMobileOpen(false);
+                  openChat();
+                }}
+                className="text-left text-sm font-bold py-2 text-[var(--accent)]"
+              >
+                Start Chat
+              </button>
+
+              <hr className="border-[var(--card-border)]" />
 
               {session ? (
-                <div className="flex items-center gap-3">
-                  {session.user?.image && (
-                    <img
-                      src={session.user.image}
-                      alt=""
-                      className="w-8 h-8 rounded-full"
-                    />
-                  )}
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                    {session.user?.name || 'User'}
-                  </span>
-                  <button
-                    onClick={() => signOut({ callbackUrl: '/' })}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-sm font-medium"
-                  >
-                    <FiLogOut className="w-4 h-4" />
-                    Sign Out
-                  </button>
-                </div>
+                <button onClick={() => signOut()} className="text-left text-sm text-red-500 font-medium py-2">
+                  Sign Out
+                </button>
               ) : (
-                <Link
-                  href="/login"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-all text-sm font-bold shadow-sm hover:shadow-md"
-                >
-                  <FiUser className="w-4 h-4" />
+                <Link href="/login" className="text-sm font-medium py-2">
                   Sign In
                 </Link>
               )}
             </div>
-
-            {/* Mobile menu toggle */}
-            <button
-              className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-              onClick={() => setMobileOpen((s) => !s)}
-              aria-label="Toggle menu"
-              aria-expanded={mobileOpen}
-            >
-              {mobileOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile menu */}
-        <AnimatePresence>
-          {mobileOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.18 }}
-              className="md:hidden overflow-hidden"
-            >
-              <div className="pt-3 pb-4 space-y-3">
-                <div className="px-4">
-                  <nav className="flex flex-col gap-2">
-                    {navItems.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setMobileOpen(false)}
-                        className="block px-3 py-2 rounded-md text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
-
-                    <Link
-                      href="/battle/new"
-                      onClick={() => setMobileOpen(false)}
-                      className="mt-2 inline-flex items-center justify-center px-3 py-2 rounded-md bg-sky-600 text-white text-sm font-semibold hover:bg-sky-500 transition"
-                    >
-                      New Battle
-                    </Link>
-
-                    {session ? (
-                      <>
-                        <div className="px-3 py-2 flex items-center gap-3 border-t border-slate-200 dark:border-slate-800 mt-2">
-                          {session.user?.image && (
-                            <img src={session.user.image} alt="" className="w-8 h-8 rounded-full" />
-                          )}
-                          <span className="text-sm font-medium text-slate-700 dark:text-gray-200">
-                            {session.user?.name || 'User'}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => {
-                            setMobileOpen(false);
-                            signOut({ callbackUrl: '/' });
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
-                        >
-                          <FiLogOut className="w-4 h-4" />
-                          Sign out
-                        </button>
-                      </>
-                    ) : (
-                      <Link
-                        href="/login"
-                        onClick={() => setMobileOpen(false)}
-                        className="mt-2 inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                      >
-                        <FiUser className="w-4 h-4" />
-                        Sign in
-                      </Link>
-                    )}
-
-                    <div className="mt-2 border-t border-slate-200 dark:border-slate-800 pt-3">
-                      <ThemeToggle />
-                    </div>
-                  </nav>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

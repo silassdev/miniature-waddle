@@ -1,38 +1,52 @@
-import NextAuth from "next-auth";
-import GitHubProvider from "next-auth/providers/github";
-import GoogleProvider from "next-auth/providers/google";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import clientPromise from "@/lib/mongodb-raw";
-import { NextAuthOptions } from "next-auth";
+import NextAuth, { type NextAuthOptions } from "next-auth"
+import GoogleProvider from "next-auth/providers/google"
+import { MongoDBAdapter } from "@next-auth/mongodb-adapter"
+import clientPromise from "@/lib/mongodb"
+
 
 export const authOptions: NextAuthOptions = {
-    adapter: MongoDBAdapter(clientPromise),
-    providers: [
-        GitHubProvider({
-            clientId: process.env.GITHUB_CLIENT_ID!,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-        }),
-        GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        }),
-    ],
-    session: {
-        strategy: "jwt",
+  adapter: MongoDBAdapter(clientPromise),
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    }),
+  ],
+  secret: process.env.NEXTAUTH_SECRET,
+  session: {
+    strategy: "database",
+    // maxAge, updateAge can be tuned if needed
+  },
+  pages: {
+    // Optional custom pages:
+    // signIn: '/auth/signin',
+    // error: '/auth/error'
+  },
+  callbacks: {
+    // Include the DB user id in the session returned to the client
+    async session({ session, user }) {
+      if (session.user) {
+        // attach database user id and any other DB fields you want available client-side
+        session.user.id = user.id
+        // Example: if your user doc has "role" or "preferences", you can attach them here:
+        // session.user.role = (user as any).role ?? 'user'
+      }
+      return session
     },
-    pages: {
-        signIn: "/login",
-    },
-    callbacks: {
-        async session({ session, token }) {
-            if (session.user && token.sub) {
-                (session.user as any).id = token.sub;
-            }
-            return session;
-        },
-    },
-};
 
-const handler = NextAuth(authOptions);
+    // Optional: control signIn behavior (return true to allow)
+    async signIn({ user, account, profile, email, credentials }) {
+      // Example: restrict by domain:
+      // const allowedDomain = process.env.ALLOWED_EMAIL_DOMAIN
+      // if (allowedDomain && email?.endsWith(`@${allowedDomain}`) === false) return false
+      return true
+    },
+  },
 
-export { handler as GET, handler as POST };
+  // Helpful debugging option (disable in production)
+  debug: process.env.NODE_ENV === "development",
+}
+
+const handler = NextAuth(authOptions)
+
+export { handler as GET, handler as POST }
