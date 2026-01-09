@@ -33,21 +33,36 @@ export default function ChatModal({
     setMessages((m) => [...m, userMessage]);
     setInput("");
 
-    // optimistic “thinking” message
+    // pessimistic “thinking” message
     const thinkingId = crypto.randomUUID();
     setMessages((m) => [...m, { role: "ai", text: "Thinking…" }]);
 
-    // TODO:
-    // replace this timeout with POST /api/chat (Gemini)
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: [...messages, userMessage] }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) throw new Error(data.error);
+
       setMessages((m) =>
         m.slice(0, -1).concat({
           role: "ai",
-          text:
-            "Psalm 34:17 — The Lord hears the cries of the righteous and delivers them from all their troubles.",
+          text: data.text,
         })
       );
-    }, 1200);
+    } catch (error) {
+      console.error("Chat error:", error);
+      setMessages((m) =>
+        m.slice(0, -1).concat({
+          role: "ai",
+          text: "I'm sorry, I'm having trouble connecting right now. Please try again later.",
+        })
+      );
+    }
   };
 
   return (
@@ -84,16 +99,14 @@ export default function ChatModal({
                 {messages.map((m, i) => (
                   <div
                     key={i}
-                    className={`flex ${
-                      m.role === "user" ? "justify-end" : "justify-start"
-                    }`}
+                    className={`flex ${m.role === "user" ? "justify-end" : "justify-start"
+                      }`}
                   >
                     <div
-                      className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${
-                        m.role === "user"
+                      className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${m.role === "user"
                           ? "bg-[var(--accent)] text-white rounded-tr-none"
                           : "bg-[var(--card)] border border-[var(--card-border)] rounded-tl-none"
-                      }`}
+                        }`}
                     >
                       {m.text}
                     </div>
