@@ -35,9 +35,10 @@ export default function ChatModal({
 
     // pessimistic “thinking” message
     const thinkingId = crypto.randomUUID();
-    setMessages((m) => [...m, { role: "ai", text: "Thinking…" }]);
+    setMessages((m) => [...m, { role: "ai", text: "ShepherdAI is reflecting…" }]);
 
     try {
+      console.log("Sending messages to API:", [...messages, userMessage]);
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -104,8 +105,8 @@ export default function ChatModal({
                   >
                     <div
                       className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${m.role === "user"
-                          ? "bg-[var(--accent)] text-white rounded-tr-none"
-                          : "bg-[var(--card)] border border-[var(--card-border)] rounded-tl-none"
+                        ? "bg-[var(--accent)] text-white rounded-tr-none"
+                        : "bg-[var(--card)] border border-[var(--card-border)] rounded-tl-none"
                         }`}
                     >
                       {m.text}

@@ -21,10 +21,7 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const navItems = [
-    { label: "Daily Bread", href: "/daily" },
-    { label: "Prayer Wall", href: "/prayers" },
-  ];
+
 
   return (
     <header className={`header transition-all duration-300 ${isScrolled ? "shadow-sm" : "bg-transparent border-transparent"}`}>
@@ -40,20 +37,10 @@ export default function Header() {
           </div>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
-          {navItems.map((item) => (
-            <Link key={item.href} href={item.href} className="text-sm font-medium text-[var(--muted)] hover:text-[var(--foreground)] transition-colors">
-              {item.label}
-            </Link>
-          ))}
-        </nav>
 
-        {/* Right Side Actions */}
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
-          {/* START CHAT */}
           <button
             onClick={openChat}
             className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--accent)] text-white text-xs font-bold hover:opacity-90 transition"
@@ -86,7 +73,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -96,12 +82,6 @@ export default function Header() {
             className="md:hidden bg-[var(--card)] border-b border-[var(--card-border)]"
           >
             <div className="container py-4 flex flex-col gap-4">
-              {navItems.map((item) => (
-                <Link key={item.href} href={item.href} className="text-sm font-medium py-2" onClick={() => setMobileOpen(false)}>
-                  {item.label}
-                </Link>
-              ))}
-
               <button
                 onClick={() => {
                   setMobileOpen(false);

@@ -13,6 +13,7 @@ Maintain a humble and supportive tone.`;
 export async function POST(req: Request) {
     try {
         const { messages } = await req.json();
+        console.log("API received messages:", messages);
 
         if (!process.env.GEMINI_API_KEY) {
             return NextResponse.json({ error: "API Key not configured" }, { status: 500 });
@@ -23,8 +24,11 @@ export async function POST(req: Request) {
             systemInstruction: SYSTEM_PROMPT
         });
 
-        // Format history for Gemini
-        const history = messages.slice(0, -1).map((msg: any) => ({
+        // Format history for Gemini - must start with "user"
+        const firstUserIndex = messages.findIndex((m: any) => m.role === "user");
+        const historyMessages = firstUserIndex !== -1 ? messages.slice(firstUserIndex, -1) : [];
+
+        const history = historyMessages.map((msg: any) => ({
             role: msg.role === "user" ? "user" : "model",
             parts: [{ text: msg.text }],
         }));
