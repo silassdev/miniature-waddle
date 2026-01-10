@@ -1,6 +1,6 @@
 // app/api/chat/route.ts
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai"; // keep your import
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const API_KEY = process.env.GEMINI_API_KEY || "";
 if (!API_KEY) console.warn("GEMINI_API_KEY not found in env");
@@ -14,18 +14,41 @@ When someone expresses harm to self/others or extreme violence, do NOT provide i
 Keep answers succinct and include a short scripture reference when relevant.
 `;
 
-function normalizeRole(r: string) {
-    const rLower = String(r || "").toLowerCase();
-    if (rLower === "user" || rLower === "u") return "user";
-    if (rLower === "assistant" || rLower === "ai" || rLower === "model" || rLower === "bot") return "model";
+// Normalize roles sent from client into "user" | "model"
+function normalizeRole(role: string | undefined) {
+    const r = String(role ?? "").toLowerCase();
+    if (["user", "u"].includes(r)) return "user";
+    if (["assistant", "ai", "model", "bot"].includes(r)) return "model";
     return "user";
 }
 
-function buildHistory(messages: any[]) {
-    const history: any[] = [];
+// Build history that meets SDK expectation:
+// - ONLY "user" and "model" roles
+// - No "system" role (that belongs in systemInstruction)
+// - Must start with "user" turn
+function buildHistoryFromMessages(messages: any[]) {
+    // Find index of the last user message (which will be our current input)
+    let lastUserIndex = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+        if (normalizeRole(messages[i].role) === "user" && String(messages[i].text || "").trim()) {
+            lastUserIndex = i;
+            break;
+        }
+    }
 
-    // Append alternating user/model messages from incoming messages
-    for (const m of messages || []) {
+    if (lastUserIndex === -1) return [];
+
+    // History is everything before the last user message
+    const prelude = messages.slice(0, lastUserIndex);
+
+    // Trim leading non-user messages
+    let trimmedPrelude = [...prelude];
+    while (trimmedPrelude.length > 0 && normalizeRole(trimmedPrelude[0].role) !== "user") {
+        trimmedPrelude.shift();
+    }
+
+    const history: any[] = [];
+    for (const m of trimmedPrelude) {
         const role = normalizeRole(m.role);
         if (!m.text) continue;
         history.push({
@@ -38,15 +61,14 @@ function buildHistory(messages: any[]) {
 }
 
 async function extractTextFromResult(result: any) {
-    // Try a few common shapes returned by different SDKs
     try {
-        // pattern: result?.response?.text() -> earlier pattern from your code
+        // common: result.response.text()
         if (result?.response?.text) {
             const t = await result.response.text();
             if (t) return t;
         }
 
-        // pattern: result?.output[0].content[0].text
+        // pattern: result.output[0].content[0].text
         if (result?.output && Array.isArray(result.output)) {
             const firstOut = result.output[0];
             if (firstOut?.content && Array.isArray(firstOut.content) && firstOut.content[0]?.text) {
@@ -59,7 +81,7 @@ async function extractTextFromResult(result: any) {
             return result.candidates[0].content[0].text;
         }
 
-        // fallback: JSON stringify for debugging
+        // fallback: stringified small sample for debugging
         return JSON.stringify(result).slice(0, 2000);
     } catch (e) {
         return `<<failed to extract text: ${String(e)}>>`;
@@ -73,42 +95,44 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const messages = body?.messages;
-        if (!Array.isArray(messages) || messages.length === 0) {
+        const messages = Array.isArray(body?.messages) ? body.messages : [];
+
+        if (messages.length === 0) {
             return NextResponse.json({ error: "No messages provided" }, { status: 400 });
         }
 
-        // Build history including system + previous messages
-        const history = buildHistory(messages);
-
-        // Final user input is the last user-type message
-        // Walk messages from end to find last user-like message
-        let lastUserText = null;
+        // Find index of last user message (this will be the current input)
+        let lastUserIndex = -1;
         for (let i = messages.length - 1; i >= 0; i--) {
-            if (normalizeRole(messages[i].role) === "user" && messages[i].text?.trim()) {
-                lastUserText = String(messages[i].text).trim();
+            if (normalizeRole(messages[i].role) === "user" && String(messages[i].text || "").trim()) {
+                lastUserIndex = i;
                 break;
             }
         }
-        if (!lastUserText) {
+
+        if (lastUserIndex === -1) {
             return NextResponse.json({ error: "No user message found in conversation" }, { status: 400 });
         }
 
-        // Basic safety: if user input contains explicit violent instructions, block locally
-        const violentPattern = /(kill|suicide|bomb|shoot|hurt someone|harm yourself|self[- ]harm)/i;
+        const lastUserText = String(messages[lastUserIndex].text).trim();
+
+        // Quick local safety filter to avoid sending explicit violent instructions to the model
+        const violentPattern = /(kill|bomb|shoot|harm yourself|hurt yourself|suicide|self[- ]harm|hurt someone)/i;
         if (violentPattern.test(lastUserText)) {
-            // Respond with compassionate redirection
-            const safeReply = "I'm sorry you're feeling this way. I can't help with harm, but I care about your safety. Please consider contacting a trusted person or local emergency services. Here's a verse: Psalm 34:18 — The Lord is close to the brokenhearted.";
+            const safeReply =
+                "I'm really sorry you're feeling this way. I can't assist with anything that could cause harm. Please reach out to a trusted person or local emergency services. Here's a verse for comfort: Psalm 34:18 — The Lord is close to the brokenhearted.";
             return NextResponse.json({ text: safeReply });
         }
 
-        // Get the generative model with system instructions
+        // Build history for startChat (only prior turns)
+        const history = buildHistoryFromMessages(messages);
+
+        // Get model - gemini-2.0-flash-lite is often faster and has different limits
         const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: "gemini-2.0-flash-lite",
             systemInstruction: SYSTEM_PROMPT
         });
 
-        // startChat expects a history array
         const chat = model.startChat({
             history,
             generationConfig: {
@@ -117,17 +141,21 @@ export async function POST(req: Request) {
             },
         });
 
-        // Send the last user text
+        // Send the current user text as the active input
         const result = await chat.sendMessage(lastUserText);
 
-
-        // Extract text robustly
         const text = await extractTextFromResult(result);
-        // Save to DB here if you want (not included)
-
         return NextResponse.json({ text });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Chat API error:", error);
+
+        // Friendly handling for quota limits (429)
+        if (error.status === 429 || String(error).includes("429") || String(error).includes("quota")) {
+            return NextResponse.json({
+                text: "I'm sorry, ShepherdAI is receiving a lot of requests right now. Please wait about a minute and try again. I'll be here! 🙏"
+            });
+        }
+
         return NextResponse.json({ error: "Failed to generate response", details: String(error) }, { status: 500 });
     }
 }
