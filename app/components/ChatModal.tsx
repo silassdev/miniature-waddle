@@ -38,7 +38,6 @@ export default function ChatModal({
     setMessages((m) => [...m, { role: "ai", text: "ShepherdAI is reflecting…" }]);
 
     try {
-      console.log("Sending messages to API:", [...messages, userMessage]);
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

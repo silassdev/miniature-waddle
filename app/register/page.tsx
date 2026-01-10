@@ -1,30 +1,62 @@
-import { signIn } from "next-auth/react";
+"use client";
+
 import { motion } from "framer-motion";
 import { FcGoogle } from "react-icons/fc";
-import { FiMail, FiLock } from "react-icons/fi";
+import { FiUser, FiMail, FiLock } from "react-icons/fi";
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
-export default function LoginPage() {
+export default function RegisterPage() {
+    const router = useRouter();
     const [loading, setLoading] = useState<string | null>(null);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: ""
+    });
+    const [error, setError] = useState("");
 
     const handleGoogleSignIn = async () => {
         setLoading("google");
         await signIn("google", { callbackUrl: "/" });
     };
 
-    const handleEmailSignIn = async (e: React.FormEvent) => {
+    const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading("email");
-        // signIn will be configured in next-auth route
-        await signIn("credentials", {
-            email,
-            password,
-            callbackUrl: "/",
-        });
-        setLoading(null);
+        setError("");
+
+        if (formData.password !== formData.confirmPassword) {
+            setError("Passwords do not match");
+            return;
+        }
+
+        setLoading("register");
+        try {
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: formData.name,
+                    email: formData.email,
+                    password: formData.password
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to register");
+            }
+
+            // Success! auto login or redirect to login
+            router.push("/login?registered=true");
+        } catch (err: any) {
+            setError(err.message);
+            setLoading(null);
+        }
     };
 
     return (
@@ -51,7 +83,7 @@ export default function LoginPage() {
                             transition={{ delay: 0.2 }}
                             className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full glass border border-white/20 backdrop-blur-sm shadow-sm"
                         >
-                            <span className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">Welcome Back</span>
+                            <span className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">Join Community</span>
                         </motion.div>
 
                         <motion.h1
@@ -69,18 +101,41 @@ export default function LoginPage() {
                             transition={{ delay: 0.4 }}
                             className="text-[var(--muted)]"
                         >
-                            Your spiritual companion for a prayerful life
+                            Start your spiritual journey today
                         </motion.p>
                     </div>
 
-                    {/* Login Form Card */}
+                    {/* Form Card */}
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5 }}
                         className="card p-8 shadow-2xl relative overflow-hidden"
                     >
-                        <form onSubmit={handleEmailSignIn} className="space-y-4">
+                        {error && (
+                            <div className="mb-6 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-medium">
+                                {error}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleRegister} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--muted)] mb-2 ml-1">
+                                    Display Name
+                                </label>
+                                <div className="relative">
+                                    <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
+                                    <input
+                                        type="text"
+                                        required
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-[var(--card-border)] bg-[var(--background)] outline-none focus:ring-2 ring-[var(--accent)]/20 transition-all text-sm"
+                                        placeholder="Your Name"
+                                    />
+                                </div>
+                            </div>
+
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-wider text-[var(--muted)] mb-2 ml-1">
                                     Email Address
@@ -90,8 +145,8 @@ export default function LoginPage() {
                                     <input
                                         type="email"
                                         required
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         className="w-full pl-12 pr-4 py-3 rounded-xl border border-[var(--card-border)] bg-[var(--background)] outline-none focus:ring-2 ring-[var(--accent)]/20 transition-all text-sm"
                                         placeholder="name@example.com"
                                     />
@@ -107,8 +162,25 @@ export default function LoginPage() {
                                     <input
                                         type="password"
                                         required
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-[var(--card-border)] bg-[var(--background)] outline-none focus:ring-2 ring-[var(--accent)]/20 transition-all text-sm"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--muted)] mb-2 ml-1">
+                                    Confirm Password
+                                </label>
+                                <div className="relative">
+                                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
+                                    <input
+                                        type="password"
+                                        required
+                                        value={formData.confirmPassword}
+                                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                                         className="w-full pl-12 pr-4 py-3 rounded-xl border border-[var(--card-border)] bg-[var(--background)] outline-none focus:ring-2 ring-[var(--accent)]/20 transition-all text-sm"
                                         placeholder="••••••••"
                                     />
@@ -120,11 +192,10 @@ export default function LoginPage() {
                                 disabled={loading !== null}
                                 className="w-full py-3.5 rounded-xl bg-[var(--accent)] text-white font-bold text-sm shadow-lg hover:shadow-[var(--accent)]/20 active:scale-[0.98] transition-all disabled:opacity-50"
                             >
-                                {loading === "email" ? "Signing In..." : "Log In"}
+                                {loading === "register" ? "Creating Account..." : "Sign Up"}
                             </button>
                         </form>
 
-                        {/* Divider */}
                         <div className="relative my-8">
                             <div className="absolute inset-0 flex items-center">
                                 <div className="w-full border-t border-[var(--card-border)]"></div>
@@ -136,29 +207,16 @@ export default function LoginPage() {
                             </div>
                         </div>
 
-                        {/* Google Sign-in */}
                         <button
                             onClick={handleGoogleSignIn}
                             disabled={loading !== null}
                             className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl border border-[var(--card-border)] bg-[var(--background)] text-[var(--foreground)] font-bold text-sm hover:bg-[var(--card-border)]/5 transition-all disabled:opacity-50"
                         >
                             <FcGoogle size={20} />
-                            {loading === "google" ? "Connecting..." : "Continue with Google"}
+                            Continue with Google
                         </button>
-
-                        <p className="mt-8 text-center text-xs text-[var(--muted)] font-medium">
-                            By continuing, you agree to our{" "}
-                            <Link href="/terms" className="text-[var(--accent)] hover:underline">
-                                Terms
-                            </Link>{" "}
-                            &{" "}
-                            <Link href="/privacy" className="text-[var(--accent)] hover:underline">
-                                Privacy
-                            </Link>
-                        </p>
                     </motion.div>
 
-                    {/* Help/Support */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -166,9 +224,9 @@ export default function LoginPage() {
                         className="mt-10 text-center space-y-4"
                     >
                         <p className="text-sm text-[var(--muted)]">
-                            Don't have an account?{" "}
-                            <Link href="/register" className="text-[var(--accent)] font-bold hover:underline">
-                                Create account
+                            Already have an account?{" "}
+                            <Link href="/login" className="text-[var(--accent)] font-bold hover:underline">
+                                Log in
                             </Link>
                         </p>
                         <Link
