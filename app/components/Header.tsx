@@ -6,18 +6,16 @@ import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiMenu, FiX, FiHeart, FiUser, FiLogOut, FiMessageSquare, FiClock, FiSettings } from "react-icons/fi";
 import ThemeToggle from "./ThemeToggle";
-import { useChat } from "@/app/components/chat/ChatContext";
+import { useChat } from "./chat/ChatContext";
 import toast from "react-hot-toast";
-import HistoryModal from "./chat/HistoryModal";
 import SettingsModal from "./profile/SettingsModal";
 
 export default function Header() {
   const { data: session } = useSession();
-  const { openChat } = useChat();
+  const { openChat, openHistory } = useChat();
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
@@ -27,7 +25,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className={`header transition-all duration-300 ${isScrolled ? "shadow-sm" : "bg-transparent border-transparent"}`}>
+    <header className={`header transition-all duration-300 z-50 ${isScrolled ? "shadow-md bg-[var(--header-bg)]" : "border-transparent bg-[var(--header-bg)]/50"}`}>
       <div className="container flex items-center justify-between h-16">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-3">
@@ -45,8 +43,8 @@ export default function Header() {
           <ThemeToggle />
 
           <button
-            onClick={openChat}
-            className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--accent)] text-white text-xs font-bold hover:opacity-90 transition"
+            onClick={() => openChat()}
+            className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--accent)] text-white text-xs font-bold hover:opacity-90 transition shadow-lg shadow-[var(--accent)]/20"
           >
             <FiMessageSquare size={14} />
             Start Chat
@@ -55,8 +53,8 @@ export default function Header() {
           {session ? (
             <div className="flex items-center gap-2 sm:gap-3">
               <button
-                onClick={() => setHistoryOpen(true)}
-                className="p-2 rounded-lg hover:bg-[var(--card-border)]/10 text-[var(--muted)] hover:text-[var(--foreground)] transition-all"
+                onClick={() => openHistory()}
+                className="p-2 rounded-lg hover:bg-[var(--card-border)]/20 text-[var(--foreground)] transition-all bg-[var(--background)]/40 backdrop-blur-sm sm:bg-transparent shadow-sm sm:shadow-none"
                 title="Chat History"
               >
                 <FiClock size={18} />
@@ -64,7 +62,7 @@ export default function Header() {
 
               <button
                 onClick={() => setSettingsOpen(true)}
-                className="p-2 rounded-lg hover:bg-[var(--card-border)]/10 text-[var(--muted)] hover:text-[var(--foreground)] transition-all"
+                className="p-2 rounded-lg hover:bg-[var(--card-border)]/20 text-[var(--foreground)] transition-all bg-[var(--background)]/40 backdrop-blur-sm sm:bg-transparent shadow-sm sm:shadow-none"
                 title="Profile Settings"
               >
                 <FiSettings size={18} />
@@ -116,7 +114,7 @@ export default function Header() {
 
               {session ? (
                 <>
-                  <button onClick={() => { setMobileOpen(false); setHistoryOpen(true); }} className="text-left text-sm font-medium py-2 flex items-center gap-2">
+                  <button onClick={() => { setMobileOpen(false); openHistory(); }} className="text-left text-sm font-medium py-2 flex items-center gap-2">
                     <FiClock /> History
                   </button>
                   <button onClick={() => { setMobileOpen(false); setSettingsOpen(true); }} className="text-left text-sm font-medium py-2 flex items-center gap-2">
@@ -136,7 +134,6 @@ export default function Header() {
         )}
       </AnimatePresence>
 
-      <HistoryModal open={historyOpen} onClose={() => setHistoryOpen(false)} />
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </header>
   );

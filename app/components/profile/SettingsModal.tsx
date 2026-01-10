@@ -1,8 +1,8 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { FiX, FiSettings, FiTrash2, FiLink2, FiUser, FiAlertTriangle } from "react-icons/fi";
-import { useState } from "react";
+import { FiX, FiSettings, FiTrash2, FiLink2, FiUser, FiAlertTriangle, FiChevronRight } from "react-icons/fi";
+import React, { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import toast from "react-hot-toast";
 
@@ -17,6 +17,14 @@ export default function SettingsModal({
     const [name, setName] = useState(session?.user?.name || "");
     const [loading, setLoading] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    useEffect(() => {
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose();
+        };
+        if (open) window.addEventListener("keydown", handleEsc);
+        return () => window.removeEventListener("keydown", handleEsc);
+    }, [open, onClose]);
 
     const handleUpdateName = async () => {
         if (!name.trim()) return;
@@ -75,123 +83,155 @@ export default function SettingsModal({
             {open && (
                 <>
                     <motion.div
-                        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[80]"
+                        className="fixed inset-0 bg-black/40 backdrop-blur-md z-[80]"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
                     />
 
                     <motion.div
-                        className="fixed z-[90] inset-y-0 right-0 max-w-md w-full bg-[var(--card)] shadow-2xl border-l border-[var(--card-border)] flex flex-col"
-                        initial={{ x: "100%" }}
-                        animate={{ x: 0 }}
-                        exit={{ x: "100%" }}
-                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className="fixed z-[1000] inset-0 flex items-center justify-center p-4 bg-transparent"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                        onClick={onClose}
                     >
-                        {/* Header */}
-                        <div className="p-6 border-b border-[var(--card-border)] flex items-center justify-between bg-[var(--background)]/50">
-                            <div className="flex items-center gap-3">
-                                <FiSettings className="text-[var(--accent)] w-5 h-5" />
-                                <h3 className="font-bold text-lg">Settings</h3>
-                            </div>
-                            <button onClick={onClose} className="p-2 hover:bg-[var(--card-border)]/20 rounded-lg transition-all">
-                                <FiX size={20} />
+                        <div
+                            className="w-full max-w-lg bg-[var(--card)] border border-[var(--card-border)] shadow-2xl rounded-[2rem] flex flex-col h-[600px] overflow-hidden relative"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Close Button - Absolute for clarity */}
+                            {/* Close Button - Absolute for clarity */}
+                            <button
+                                onClick={onClose}
+                                className="absolute top-6 right-6 p-3 rounded-2xl bg-[var(--background)] border-2 border-[var(--card-border)] hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 group transition-all z-10 shadow-xl flex items-center gap-2"
+                                aria-label="Close"
+                            >
+                                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--muted)] group-hover:text-[var(--accent)] hidden sm:block">Exit</span>
+                                <FiX size={20} className="text-[var(--foreground)] group-hover:text-[var(--accent)]" />
                             </button>
-                        </div>
 
-                        {/* Content */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                            {/* Header */}
+                            <div className="p-8 border-b border-[var(--card-border)] bg-[var(--background)]/30">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)] shadow-inner">
+                                        <FiSettings size={24} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-black text-2xl tracking-tight text-[var(--foreground)]">Profile Settings</h3>
+                                        <p className="text-xs font-bold text-[var(--muted)] uppercase tracking-widest mt-0.5">Manage your account</p>
+                                    </div>
+                                </div>
+                            </div>
 
-                            {/* Profile Section */}
-                            <div className="space-y-4">
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--muted)]">Profile Settings</h4>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-[var(--muted)]">Display Name</label>
-                                    <div className="flex gap-2">
-                                        <input
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                            className="flex-1 bg-[var(--background)] border border-[var(--card-border)] rounded-xl px-4 py-2 text-sm focus:ring-2 ring-[var(--accent)]/10 outline-none"
-                                        />
+                            {/* Content */}
+                            <div className="flex-1 overflow-y-auto p-8 space-y-8 bg-[var(--card)]">
+                                {/* Profile Section */}
+                                <div className="space-y-5">
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-[var(--muted)] flex items-center gap-2">
+                                        <FiUser size={12} /> Personal Information
+                                    </h4>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-[var(--muted)] uppercase tracking-wider ml-1">Display Name</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                value={name}
+                                                onChange={(e) => setName(e.target.value)}
+                                                placeholder="Enter your name"
+                                                className="flex-1 bg-[var(--background)] border border-[var(--card-border)] rounded-2xl px-5 py-3 text-sm font-medium focus:ring-2 ring-[var(--accent)]/20 outline-none transition-all placeholder:text-[var(--muted)]/50"
+                                            />
+                                            <button
+                                                onClick={handleUpdateName}
+                                                disabled={loading || name === session?.user?.name}
+                                                className="px-6 py-3 bg-[var(--accent)] text-white text-xs font-black uppercase tracking-widest rounded-2xl disabled:opacity-30 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-[var(--accent)]/25"
+                                            >
+                                                Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="h-px bg-gradient-to-r from-transparent via-[var(--card-border)] to-transparent" />
+
+                                {/* Account Connections */}
+                                <div className="space-y-5">
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-[var(--muted)] flex items-center gap-2">
+                                        <FiLink2 size={12} /> Connections
+                                    </h4>
+                                    <div className="p-5 rounded-3xl border border-[var(--card-border)] bg-[var(--background)]/50 flex items-center justify-between group hover:border-[var(--accent)]/30 transition-all">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 shadow-sm">
+                                                <FiLink2 size={18} />
+                                            </div>
+                                            <div>
+                                                <span className="text-sm font-bold block text-[var(--foreground)]">Google OAuth</span>
+                                                <span className="text-[10px] text-green-500 font-bold uppercase tracking-widest">Connected</span>
+                                            </div>
+                                        </div>
                                         <button
-                                            onClick={handleUpdateName}
-                                            disabled={loading || name === session?.user?.name}
-                                            className="px-4 py-2 bg-[var(--accent)] text-white text-xs font-bold rounded-xl disabled:opacity-30 transition-all hover:scale-105"
+                                            onClick={handleUnlink}
+                                            className="px-4 py-2 rounded-xl bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all border border-red-500/20"
                                         >
-                                            Save
+                                            Unlink
                                         </button>
                                     </div>
                                 </div>
-                            </div>
 
-                            <hr className="border-[var(--card-border)]" />
+                                <div className="h-px bg-gradient-to-r from-transparent via-[var(--card-border)] to-transparent" />
 
-                            {/* Account Connections */}
-                            <div className="space-y-4">
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--muted)]">Connections</h4>
-                                <div className="p-4 rounded-2xl border border-[var(--card-border)] flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
-                                            <FiLink2 size={16} />
-                                        </div>
-                                        <span className="text-sm font-medium">Google OAuth</span>
-                                    </div>
-                                    <button
-                                        onClick={handleUnlink}
-                                        className="text-[10px] font-bold uppercase tracking-widest text-red-500 hover:text-red-400"
-                                    >
-                                        Unlink
-                                    </button>
+                                {/* Danger Zone */}
+                                <div className="space-y-5">
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-red-500 flex items-center gap-2">
+                                        <FiAlertTriangle size={12} /> Danger Zone
+                                    </h4>
+
+                                    {!showDeleteConfirm ? (
+                                        <button
+                                            onClick={() => setShowDeleteConfirm(true)}
+                                            className="w-full p-5 rounded-3xl border border-red-500/20 bg-red-500/5 flex items-center justify-between hover:bg-red-500/10 transition-all group"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 shadow-sm">
+                                                    <FiTrash2 size={18} />
+                                                </div>
+                                                <span className="text-sm font-bold text-red-500">Permanently Delete Account</span>
+                                            </div>
+                                            <FiChevronRight className="text-red-500/50 group-hover:translate-x-1 transition-transform" />
+                                        </button>
+                                    ) : (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="p-6 rounded-3xl border-2 border-red-500/30 bg-red-500/5 space-y-5"
+                                        >
+                                            <div className="flex items-start gap-4 text-red-500">
+                                                <div className="w-10 h-10 rounded-2xl bg-red-500/20 flex items-center justify-center shrink-0">
+                                                    <FiAlertTriangle size={20} />
+                                                </div>
+                                                <p className="text-xs font-bold leading-relaxed">
+                                                    This action is irreversible. All your chat history and profile data will be purged from our servers.
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-3">
+                                                <button
+                                                    onClick={handleDeleteAccount}
+                                                    disabled={loading}
+                                                    className="flex-1 py-4 bg-red-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-red-600 transition-all shadow-lg shadow-red-500/25 disabled:opacity-50"
+                                                >
+                                                    Confirm Purge
+                                                </button>
+                                                <button
+                                                    onClick={() => setShowDeleteConfirm(false)}
+                                                    className="px-6 py-4 border border-[var(--card-border)] bg-[var(--card)] text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-[var(--card-border)]/20 transition-all"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    )}
                                 </div>
                             </div>
-
-                            <hr className="border-[var(--card-border)]" />
-
-                            {/* Danger Zone */}
-                            <div className="space-y-4">
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500">Danger Zone</h4>
-
-                                {!showDeleteConfirm ? (
-                                    <button
-                                        onClick={() => setShowDeleteConfirm(true)}
-                                        className="w-full p-4 rounded-2xl border border-red-500/20 bg-red-500/5 flex items-center justify-between hover:bg-red-500/10 transition-all group"
-                                    >
-                                        <div className="flex items-center gap-3 text-red-500">
-                                            <FiTrash2 size={16} />
-                                            <span className="text-sm font-bold">Delete Account</span>
-                                        </div>
-                                    </button>
-                                ) : (
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        className="p-5 rounded-2xl border-2 border-red-500/50 bg-red-500/10 space-y-4"
-                                    >
-                                        <div className="flex items-start gap-3 text-red-500">
-                                            <FiAlertTriangle className="shrink-0 mt-1" size={20} />
-                                            <p className="text-xs font-medium leading-relaxed">
-                                                Are you absolutely sure? This will permanently delete your profile, chat history, and all faith recordings. This action cannot be undone.
-                                            </p>
-                                        </div>
-                                        <div className="flex gap-2 pt-2">
-                                            <button
-                                                onClick={handleDeleteAccount}
-                                                className="flex-1 py-3 bg-red-500 text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-red-600 transition-all"
-                                            >
-                                                Yes, Delete
-                                            </button>
-                                            <button
-                                                onClick={() => setShowDeleteConfirm(false)}
-                                                className="px-4 py-3 border border-[var(--card-border)] text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-[var(--card-border)]/10 transition-all"
-                                            >
-                                                Cancel
-                                            </button>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </div>
-
                         </div>
                     </motion.div>
                 </>
