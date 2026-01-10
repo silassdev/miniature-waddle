@@ -51,28 +51,28 @@ export const authOptions: NextAuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: "database",
+    strategy: "jwt",
   },
   pages: {
-    // Optional custom pages:
-    // signIn: '/auth/signin',
-    // error: '/auth/error'
+    signIn: '/login',
   },
   callbacks: {
-    async session({ session, user }) {
-      if (session.user) {
-        // attach database user id and any other DB fields you want available client-side
-        session.user.id = user.id
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
       }
-      return session
+      return token;
     },
-
-    // Optional: control signIn behavior (return true to allow)
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+      }
+      return session;
+    },
     async signIn({ user, account, profile, email, credentials }) {
-      return true
+      return true;
     },
   },
-
   debug: process.env.NODE_ENV === "development",
 }
 

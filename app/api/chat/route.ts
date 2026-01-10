@@ -127,9 +127,9 @@ export async function POST(req: Request) {
         // Build history for startChat (only prior turns)
         const history = buildHistoryFromMessages(messages);
 
-        // Get model - gemini-2.0-flash-lite is often faster and has different limits
+        // Get model - gemini-2.5-flash is a newer model and may have fresh quota
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash-lite",
+            model: "gemini-2.5-flash",
             systemInstruction: SYSTEM_PROMPT
         });
 
