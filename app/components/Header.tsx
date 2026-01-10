@@ -4,10 +4,12 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiMenu, FiX, FiHeart, FiUser, FiLogOut, FiMessageSquare } from "react-icons/fi";
+import { FiMenu, FiX, FiHeart, FiUser, FiLogOut, FiMessageSquare, FiClock, FiSettings } from "react-icons/fi";
 import ThemeToggle from "./ThemeToggle";
 import { useChat } from "@/app/components/chat/ChatContext";
 import toast from "react-hot-toast";
+import HistoryModal from "./chat/HistoryModal";
+import SettingsModal from "./profile/SettingsModal";
 
 export default function Header() {
   const { data: session } = useSession();
@@ -15,14 +17,14 @@ export default function Header() {
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 8);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-
 
   return (
     <header className={`header transition-all duration-300 ${isScrolled ? "shadow-sm" : "bg-transparent border-transparent"}`}>
@@ -51,14 +53,23 @@ export default function Header() {
           </button>
 
           {session ? (
-            <div className="flex items-center gap-3">
-              {session.user?.image && (
-                <img
-                  src={session.user.image}
-                  alt={session.user.name || "Profile"}
-                  className="w-8 h-8 rounded-full ring-2 ring-[var(--accent)]/20 p-0.5"
-                />
-              )}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                onClick={() => setHistoryOpen(true)}
+                className="p-2 rounded-lg hover:bg-[var(--card-border)]/10 text-[var(--muted)] hover:text-[var(--foreground)] transition-all"
+                title="Chat History"
+              >
+                <FiClock size={18} />
+              </button>
+
+              <button
+                onClick={() => setSettingsOpen(true)}
+                className="p-2 rounded-lg hover:bg-[var(--card-border)]/10 text-[var(--muted)] hover:text-[var(--foreground)] transition-all"
+                title="Profile Settings"
+              >
+                <FiSettings size={18} />
+              </button>
+
               <button
                 onClick={() => {
                   toast.success("Signed out successfully");
@@ -104,9 +115,17 @@ export default function Header() {
               <hr className="border-[var(--card-border)]" />
 
               {session ? (
-                <button onClick={() => signOut()} className="text-left text-sm text-red-500 font-medium py-2">
-                  Sign Out
-                </button>
+                <>
+                  <button onClick={() => { setMobileOpen(false); setHistoryOpen(true); }} className="text-left text-sm font-medium py-2 flex items-center gap-2">
+                    <FiClock /> History
+                  </button>
+                  <button onClick={() => { setMobileOpen(false); setSettingsOpen(true); }} className="text-left text-sm font-medium py-2 flex items-center gap-2">
+                    <FiSettings /> Settings
+                  </button>
+                  <button onClick={() => signOut()} className="text-left text-sm text-red-500 font-medium py-2">
+                    Sign Out
+                  </button>
+                </>
               ) : (
                 <Link href="/login" className="text-sm font-medium py-2">
                   Sign In
@@ -116,6 +135,9 @@ export default function Header() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <HistoryModal open={historyOpen} onClose={() => setHistoryOpen(false)} />
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </header>
   );
 }

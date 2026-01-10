@@ -100,6 +100,11 @@ async function extractTextFromResult(result: any) {
     }
 }
 
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
+import dbConnect from "@/lib/db";
+import { Chat } from "@/models/Chat.model";
+
 export async function POST(req: Request) {
     try {
         if (!API_KEY) {
@@ -108,6 +113,7 @@ export async function POST(req: Request) {
 
         const body = await req.json();
         const messages = Array.isArray(body?.messages) ? body.messages : [];
+        const chatId = body?.chatId; // Optional: ID of an existing chat session
 
         if (messages.length === 0) {
             return NextResponse.json({ error: "No messages provided" }, { status: 400 });
@@ -128,7 +134,7 @@ export async function POST(req: Request) {
 
         const lastUserText = String(messages[lastUserIndex].text).trim();
 
-        // Quick local safety filter to avoid sending explicit violent instructions to the model
+        // Quick local safety filter
         const violentPattern = /(kill|bomb|shoot|harm yourself|hurt yourself|suicide|self[- ]harm|hurt someone)/i;
         if (violentPattern.test(lastUserText)) {
             const safeReply =
@@ -136,10 +142,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ text: safeReply });
         }
 
-        // Build history for startChat (only prior turns)
+        // Build history for startChat
         const history = buildHistoryFromMessages(messages);
 
-        // Get model - gemini-2.5-flash is a newer model and may have fresh quota
         const model = genAI.getGenerativeModel({
             model: "gemini-2.5-flash",
             systemInstruction: SYSTEM_PROMPT
@@ -153,15 +158,53 @@ export async function POST(req: Request) {
             },
         });
 
-        // Send the current user text as the active input
         const result = await chat.sendMessage(lastUserText);
-
         const text = await extractTextFromResult(result);
-        return NextResponse.json({ text });
+
+        // --- Database Persistence ---
+        const session = await getServerSession(authOptions);
+        let finalChatId = chatId;
+
+        if (session?.user?.id) {
+            await dbConnect();
+
+            const newMessageUser = { role: "user", text: lastUserText, timestamp: Date.now() };
+            const newMessageAI = { role: "ai", text: text, timestamp: Date.now() };
+
+            if (chatId) {
+                // Update existing chat
+                const existingChat = await Chat.findOneAndUpdate(
+                    { _id: chatId, userId: session.user.id },
+                    { $push: { messages: { $each: [newMessageUser, newMessageAI] } } },
+                    { new: true }
+                );
+                if (!existingChat) {
+                    // If not found (maybe belongs to someone else?), fallback to creating new or error
+                    // For now, let's treat it as a new chat if ID is invalid for this user
+                    const newChat = new Chat({
+                        userId: session.user.id,
+                        title: lastUserText.slice(0, 40) + "...",
+                        messages: [newMessageUser, newMessageAI]
+                    });
+                    const saved = await newChat.save();
+                    finalChatId = saved._id;
+                }
+            } else {
+                // Create new chat
+                const newChat = new Chat({
+                    userId: session.user.id,
+                    title: lastUserText.slice(0, 40) + "...",
+                    messages: [newMessageUser, newMessageAI]
+                });
+                const saved = await newChat.save();
+                finalChatId = saved._id;
+            }
+        }
+
+        return NextResponse.json({ text, chatId: finalChatId });
     } catch (error: any) {
         console.error("Chat API error:", error);
 
-        // Friendly handling for quota limits (429)
         if (error.status === 429 || String(error).includes("429") || String(error).includes("quota")) {
             return NextResponse.json({
                 text: "I'm sorry, ShepherdAI is receiving a lot of requests right now. Please wait about a minute and try again. I'll be here! 🙏"

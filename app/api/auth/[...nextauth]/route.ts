@@ -69,7 +69,17 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async signIn({ user, account, profile, email, credentials }) {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        await dbConnect();
+        const existingUser = await User.findOne({ email: user.email });
+        if (existingUser) {
+          // You can add logic here to merge or notify, 
+          // but NextAuth with MongoDBAdapter will usually handle the link 
+          // if we return true and the email matches.
+          return true;
+        }
+      }
       return true;
     },
   },
