@@ -1,9 +1,12 @@
+"use client";
+
 import { signIn } from "next-auth/react";
 import { motion } from "framer-motion";
 import { FcGoogle } from "react-icons/fc";
 import { FiMail, FiLock } from "react-icons/fi";
 import { useState } from "react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
     const [loading, setLoading] = useState<string | null>(null);
@@ -12,19 +15,32 @@ export default function LoginPage() {
 
     const handleGoogleSignIn = async () => {
         setLoading("google");
-        await signIn("google", { callbackUrl: "/" });
+        try {
+            await signIn("google", { callbackUrl: "/" });
+        } catch (error) {
+            toast.error("Failed to sign in with Google");
+            setLoading(null);
+        }
     };
 
     const handleEmailSignIn = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading("email");
-        // signIn will be configured in next-auth route
-        await signIn("credentials", {
+
+        const result = await signIn("credentials", {
             email,
             password,
+            redirect: false,
             callbackUrl: "/",
         });
-        setLoading(null);
+
+        if (result?.error) {
+            toast.error(result.error || "Invalid email or password");
+            setLoading(null);
+        } else {
+            toast.success("Welcome back!");
+            window.location.href = "/";
+        }
     };
 
     return (

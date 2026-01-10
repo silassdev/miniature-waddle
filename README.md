@@ -20,13 +20,6 @@ ShepherdAI is a web application designed to provide compassionate, scripture-roo
 - Animations: Framer Motion
 - Icons: React Icons (Feather)
 
-## Getting Started
-
-### Prerequisites
-- Node.js 18.x or higher
-- MongoDB instance (local or Atlas)
-- Google Cloud Project with Gemini API access
-
 
 
 ## Project Structure

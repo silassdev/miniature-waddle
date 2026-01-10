@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiMenu, FiX, FiHeart, FiUser, FiLogOut, FiMessageSquare } from "react-icons/fi";
 import ThemeToggle from "./ThemeToggle";
 import { useChat } from "@/app/components/chat/ChatContext";
+import toast from "react-hot-toast";
 
 export default function Header() {
   const { data: session } = useSession();
@@ -52,17 +53,25 @@ export default function Header() {
           {session ? (
             <div className="flex items-center gap-3">
               {session.user?.image && (
-                <img src={session.user.image} alt="" className="w-8 h-8 rounded-full border border-[var(--card-border)]" />
+                <img
+                  src={session.user.image}
+                  alt={session.user.name || "Profile"}
+                  className="w-8 h-8 rounded-full ring-2 ring-[var(--accent)]/20 p-0.5"
+                />
               )}
               <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 text-red-500 text-xs font-bold hover:bg-red-500/20 transition"
+                onClick={() => {
+                  toast.success("Signed out successfully");
+                  signOut({ callbackUrl: "/" });
+                }}
+                className="flex items-center justify-center p-2 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all shadow-sm"
+                title="Sign Out"
               >
-                <FiLogOut /> Sign Out
+                <FiLogOut size={16} />
               </button>
             </div>
           ) : (
-            <Link href="/login" className="btn-primary text-xs flex items-center gap-2">
+            <Link href="/login" className="flex items-center gap-2 px-4 py-2 rounded-full border border-[var(--card-border)] text-xs font-bold hover:bg-[var(--card-border)]/5 transition-standard">
               <FiUser className="w-3 h-3" /> Sign In
             </Link>
           )}
