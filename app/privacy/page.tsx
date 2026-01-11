@@ -1,139 +1,221 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { FiChevronLeft, FiLock, FiEye, FiDatabase, FiShare2, FiUserCheck } from "react-icons/fi";
+import { motion } from "framer-motion";
+import { FiArrowLeft, FiLock, FiEye, FiShield, FiDatabase } from "react-icons/fi";
 
 export default function PrivacyPage() {
     return (
-        <main className="relative overflow-hidden min-h-screen">
-            {/* Animated Background */}
-            <div className="absolute inset-0 -z-10">
-                <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-gradient-to-br from-emerald-500/10 via-teal-500/10 to-cyan-500/10 rounded-full blur-3xl animate-pulse"
-                    style={{ animationDuration: '7s' }} />
-                <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-gradient-to-tr from-purple-500/10 via-pink-500/10 to-rose-500/10 rounded-full blur-3xl animate-pulse"
-                    style={{ animationDuration: '9s', animationDelay: '2s' }} />
-            </div>
-
-            <div className="container py-16 md:py-24 max-w-4xl mx-auto">
-                {/* Back Link */}
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="mb-8"
+        <div className="min-h-screen bg-[var(--background)] py-12 px-4">
+            <div className="max-w-4xl mx-auto">
+                {/* Back Button */}
+                <Link
+                    href="/"
+                    className="inline-flex items-center gap-2 text-sm font-bold text-[var(--muted)] hover:text-[var(--foreground)] transition-colors mb-8"
                 >
-                    <Link href="/login" className="inline-flex items-center gap-2 text-gray-500 hover:text-brand-primary transition-colors font-medium">
-                        <FiChevronLeft />
-                        Back to Login
-                    </Link>
-                </motion.div>
+                    <FiArrowLeft size={18} />
+                    Back to Home
+                </Link>
 
                 {/* Header */}
                 <motion.div
+                    className="bg-[var(--card)] border border-[var(--card-border)] rounded-3xl p-8 mb-6 shadow-lg"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-12"
+                    transition={{ duration: 0.3 }}
                 >
-                    <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full glass border border-white/20 backdrop-blur-sm">
-                        <FiLock className="text-emerald-500" />
-                        <span className="text-xs font-bold uppercase tracking-wider">Privacy First</span>
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="w-16 h-16 rounded-2xl bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)] shadow-inner">
+                            <FiLock size={32} />
+                        </div>
+                        <div>
+                            <h1 className="font-black text-3xl tracking-tight text-[var(--foreground)]">Privacy Policy</h1>
+                            <p className="text-sm font-bold text-[var(--muted)] uppercase tracking-widest mt-1">Last updated: January 10, 2026</p>
+                        </div>
                     </div>
-                    <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tight">
-                        Privacy{" "}
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600">
-                            Policy
-                        </span>
-                    </h1>
-                    <p className="text-lg text-gray-600 dark:text-gray-400">
-                        How we protect and handle your professional developer data
-                    </p>
                 </motion.div>
 
                 {/* Content */}
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    className="bg-[var(--card)] border border-[var(--card-border)] rounded-3xl p-8 shadow-lg space-y-8"
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="space-y-8"
+                    transition={{ duration: 0.3, delay: 0.1 }}
                 >
-                    <section className="glass rounded-3xl p-8 md:p-10 border border-white/20 backdrop-blur-xl shadow-xl">
-                        <h2 className="text-2xl font-bold mb-4 flex items-center gap-3">
-                            <FiEye className="text-blue-500" />
+                    <section>
+                        <div className="flex items-center gap-3 mb-4">
+                            <FiShield className="text-[var(--accent)]" size={24} />
+                            <h2 className="text-xl font-black text-[var(--foreground)]">
+                                Your Privacy is Sacred
+                            </h2>
+                        </div>
+                        <p className="text-[var(--muted)] leading-relaxed">
+                            At ShepherdAI, we understand that your spiritual journey is deeply personal. We are committed
+                            to protecting your privacy and maintaining the confidentiality of your conversations with our
+                            faith-based AI companion.
+                        </p>
+                    </section>
+
+                    <div className="h-px bg-gradient-to-r from-transparent via-[var(--card-border)] to-transparent" />
+
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4 flex items-center gap-2">
+                            <FiDatabase size={20} />
                             1. Information We Collect
                         </h2>
-                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
-                            We only collect data that is publicly available on GitHub and the minimal information provided during OAuth sign-in:
-                        </p>
-                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-400">
-                            <li>Public GitHub username and profile display name</li>
-                            <li>Public avatar URL</li>
-                            <li>Public statistics (Followers, Repositories, Stars)</li>
-                            <li>Email address (for authentication purposes only)</li>
+                        <div className="space-y-4">
+                            <div>
+                                <h3 className="text-base font-bold text-[var(--foreground)] mb-2">Account Information</h3>
+                                <ul className="space-y-2 text-[var(--muted)] list-disc list-inside ml-4">
+                                    <li>Name and email address (via Google OAuth)</li>
+                                    <li>Profile picture (optional, from Google account)</li>
+                                    <li>Account creation date and last login time</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 className="text-base font-bold text-[var(--foreground)] mb-2">Conversation Data</h3>
+                                <ul className="space-y-2 text-[var(--muted)] list-disc list-inside ml-4">
+                                    <li>Your messages and questions to ShepherdAI</li>
+                                    <li>AI responses and spiritual guidance provided</li>
+                                    <li>Chat history and timestamps</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 className="text-base font-bold text-[var(--foreground)] mb-2">Technical Data</h3>
+                                <ul className="space-y-2 text-[var(--muted)] list-disc list-inside ml-4">
+                                    <li>Browser type and device information</li>
+                                    <li>IP address and general location (country/region)</li>
+                                    <li>Session data and usage statistics</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4 flex items-center gap-2">
+                            <FiEye size={20} />
+                            2. How We Use Your Information
+                        </h2>
+                        <ul className="space-y-3">
+                            <li className="flex items-start gap-3">
+                                <span className="text-[var(--accent)] mt-1">✓</span>
+                                <p className="text-[var(--muted)] leading-relaxed">
+                                    <strong className="text-[var(--foreground)]">Provide Spiritual Support:</strong> To deliver personalized, faith-based conversations and prayer guidance
+                                </p>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <span className="text-[var(--accent)] mt-1">✓</span>
+                                <p className="text-[var(--muted)] leading-relaxed">
+                                    <strong className="text-[var(--foreground)]">Maintain Chat History:</strong> To save your conversations so you can reflect on past discussions
+                                </p>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <span className="text-[var(--accent)] mt-1">✓</span>
+                                <p className="text-[var(--muted)] leading-relaxed">
+                                    <strong className="text-[var(--foreground)]">Improve Our Service:</strong> To enhance AI responses and user experience (anonymized data only)
+                                </p>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <span className="text-[var(--accent)] mt-1">✓</span>
+                                <p className="text-[var(--muted)] leading-relaxed">
+                                    <strong className="text-[var(--foreground)]">Security & Safety:</strong> To protect against abuse and ensure service integrity
+                                </p>
+                            </li>
                         </ul>
                     </section>
 
-                    <section className="glass rounded-3xl p-8 md:p-10 border border-white/20 backdrop-blur-xl shadow-xl">
-                        <h2 className="text-2xl font-bold mb-4 flex items-center gap-3">
-                            <FiDatabase className="text-emerald-500" />
-                            2. How We Use It
-                        </h2>
-                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
-                            Your data is used specifically for the GitBattle ecosystem:
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4">3. Data Sharing & Third Parties</h2>
+                        <div className="bg-[var(--accent)]/5 p-6 rounded-2xl border border-[var(--accent)]/20 mb-4">
+                            <p className="text-[var(--foreground)] font-bold mb-2">We DO NOT sell your personal information.</p>
+                            <p className="text-[var(--muted)] text-sm">
+                                Your spiritual conversations remain private and confidential.
+                            </p>
+                        </div>
+                        <p className="text-[var(--muted)] leading-relaxed mb-3">
+                            We only share data with:
                         </p>
-                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-400">
-                            <li>Generating profile comparison visualizations</li>
-                            <li>Calculating ranked battle scores</li>
-                            <li>Displaying your ranking on the global leaderboard</li>
-                            <li>Maintaining your authenticated session</li>
+                        <ul className="space-y-2 text-[var(--muted)] list-disc list-inside ml-4">
+                            <li><strong className="text-[var(--foreground)]">Google OAuth:</strong> For secure authentication</li>
+                            <li><strong className="text-[var(--foreground)]">AI Service Providers:</strong> To process your conversations (with strict confidentiality agreements)</li>
+                            <li><strong className="text-[var(--foreground)]">Legal Authorities:</strong> Only when required by law</li>
                         </ul>
                     </section>
 
-                    <section className="glass rounded-3xl p-8 md:p-10 border border-white/20 backdrop-blur-xl shadow-xl">
-                        <h2 className="text-2xl font-bold mb-4 flex items-center gap-3">
-                            <FiShare2 className="text-purple-500" />
-                            3. Data Sharing
-                        </h2>
-                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                            We do not sell, trade, or lease your personal information to third parties. Your public profile data (username, avatar, and battle score) is visible to other users on the global leaderboard. We use standard third-party authentication providers (GitHub, Google) to handle secure sign-ins.
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4">4. Data Security</h2>
+                        <p className="text-[var(--muted)] leading-relaxed mb-4">
+                            We implement industry-standard security measures to protect your data, including:
                         </p>
-                    </section>
-
-                    <section className="glass rounded-3xl p-8 md:p-10 border border-white/20 backdrop-blur-xl shadow-xl">
-                        <h2 className="text-2xl font-bold mb-4 flex items-center gap-3">
-                            <FiUserCheck className="text-rose-500" />
-                            4. Your Control
-                        </h2>
-                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
-                            You have full control over your session and presence on GitBattle:
-                        </p>
-                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-400">
-                            <li>You can sign out at any time to clear your local session</li>
-                            <li>You can revoke GitBattle's access via your GitHub or Google account settings</li>
-                            <li>To request deletion of your leaderboard record, please contact us</li>
+                        <ul className="space-y-2 text-[var(--muted)] list-disc list-inside ml-4">
+                            <li>Encrypted connections (HTTPS/TLS)</li>
+                            <li>Secure database storage with access controls</li>
+                            <li>Regular security audits and updates</li>
+                            <li>Authentication via trusted Google OAuth</li>
                         </ul>
                     </section>
 
-                    <section className="glass rounded-3xl p-8 md:p-10 border border-white/20 backdrop-blur-xl shadow-xl">
-                        <h2 className="text-2xl font-bold mb-4">5. Security Measures</h2>
-                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                            We implement a variety of security measures to maintain the safety of your information. We use SSL encryption for all data transport and industry-standard hashing for session management. We do not store sensitive passwords; all authentication is handled via OAuth.
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4">5. Your Rights & Choices</h2>
+                        <div className="space-y-3">
+                            <p className="text-[var(--muted)] leading-relaxed">You have the right to:</p>
+                            <ul className="space-y-2 text-[var(--muted)] list-disc list-inside ml-4">
+                                <li><strong className="text-[var(--foreground)]">Access:</strong> View your profile and conversation history anytime</li>
+                                <li><strong className="text-[var(--foreground)]">Update:</strong> Modify your display name and preferences</li>
+                                <li><strong className="text-[var(--foreground)]">Delete:</strong> Permanently remove your account and all associated data via the{" "}
+                                    <Link href="/settings" className="text-[var(--accent)] hover:underline">settings page</Link>
+                                </li>
+                                <li><strong className="text-[var(--foreground)]">Unlink:</strong> Disconnect your Google account</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4">6. Cookies & Tracking</h2>
+                        <p className="text-[var(--muted)] leading-relaxed">
+                            We use essential cookies for authentication and session management. We do not use tracking
+                            cookies for advertising purposes. You can control cookie preferences in your browser settings.
                         </p>
                     </section>
-                </motion.div>
 
-                {/* Footer Link */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="mt-12 text-center"
-                >
-                    <p className="text-gray-500 mb-4">Privacy concerns?</p>
-                    <Link href="/contact" className="text-brand-primary font-bold hover:underline">
-                        Legal Inquiry
-                    </Link>
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4">7. Children's Privacy</h2>
+                        <p className="text-[var(--muted)] leading-relaxed">
+                            ShepherdAI is intended for users aged 13 and above. We do not knowingly collect information
+                            from children under 13. If you believe a child has provided us with personal information,
+                            please contact us immediately.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4">8. Changes to This Policy</h2>
+                        <p className="text-[var(--muted)] leading-relaxed">
+                            We may update this Privacy Policy periodically. We will notify users of significant changes
+                            via email or through the service. Continued use after changes constitutes acceptance.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4">9. Contact Us</h2>
+                        <p className="text-[var(--muted)] leading-relaxed">
+                            If you have questions, concerns, or requests regarding your privacy, please visit our {" "}
+                            <Link href="/contact" className="text-[var(--accent)] hover:underline font-bold">
+                                contact page
+                            </Link> or reach out to support.
+                        </p>
+                    </section>
+
+                    <div className="mt-8 p-6 bg-gradient-to-r from-[var(--accent)]/5 to-blue-500/5 rounded-2xl border border-[var(--accent)]/20">
+                        <p className="text-sm text-[var(--foreground)] font-bold text-center mb-2">
+                            🙏 Your Trust is Our Blessing
+                        </p>
+                        <p className="text-xs text-[var(--muted)] text-center">
+                            We honor the sacred trust you place in us by sharing your spiritual journey.
+                            Your privacy and spiritual wellbeing are at the heart of everything we do.
+                        </p>
+                    </div>
                 </motion.div>
             </div>
-        </main>
+        </div>
     );
 }

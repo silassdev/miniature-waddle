@@ -1,133 +1,153 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { FiChevronLeft, FiShield, FiFileText, FiShieldOff, FiInfo, FiGithub } from "react-icons/fi";
+import { motion } from "framer-motion";
+import { FiArrowLeft, FiHeart, FiShield, FiCheck } from "react-icons/fi";
 
 export default function TermsPage() {
     return (
-        <main className="relative overflow-hidden min-h-screen">
-            {/* Animated Background */}
-            <div className="absolute inset-0 -z-10">
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-full blur-3xl animate-pulse"
-                    style={{ animationDuration: '6s' }} />
-                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-emerald-500/10 via-cyan-500/10 to-blue-500/10 rounded-full blur-3xl animate-pulse"
-                    style={{ animationDuration: '8s', animationDelay: '1s' }} />
-            </div>
-
-            <div className="container py-16 md:py-24 max-w-4xl mx-auto">
-                {/* Back Link */}
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="mb-8"
+        <div className="min-h-screen bg-[var(--background)] py-12 px-4">
+            <div className="max-w-4xl mx-auto">
+                {/* Back Button */}
+                <Link
+                    href="/"
+                    className="inline-flex items-center gap-2 text-sm font-bold text-[var(--muted)] hover:text-[var(--foreground)] transition-colors mb-8"
                 >
-                    <Link href="/login" className="inline-flex items-center gap-2 text-gray-500 hover:text-brand-primary transition-colors font-medium">
-                        <FiChevronLeft />
-                        Back to Login
-                    </Link>
-                </motion.div>
+                    <FiArrowLeft size={18} />
+                    Back to Home
+                </Link>
 
                 {/* Header */}
                 <motion.div
+                    className="bg-[var(--card)] border border-[var(--card-border)] rounded-3xl p-8 mb-6 shadow-lg"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-12"
+                    transition={{ duration: 0.3 }}
                 >
-                    <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full glass border border-white/20 backdrop-blur-sm">
-                        <FiFileText className="text-brand-primary" />
-                        <span className="text-xs font-bold uppercase tracking-wider">Legal Framework</span>
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="w-16 h-16 rounded-2xl bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)] shadow-inner">
+                            <FiShield size={32} />
+                        </div>
+                        <div>
+                            <h1 className="font-black text-3xl tracking-tight text-[var(--foreground)]">Terms of Service</h1>
+                            <p className="text-sm font-bold text-[var(--muted)] uppercase tracking-widest mt-1">Last updated: January 10, 2026</p>
+                        </div>
                     </div>
-                    <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tight">
-                        Terms of{" "}
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
-                            Service
-                        </span>
-                    </h1>
-                    <p className="text-lg text-gray-600 dark:text-gray-400">
-                        Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                    </p>
                 </motion.div>
 
                 {/* Content */}
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    className="bg-[var(--card)] border border-[var(--card-border)] rounded-3xl p-8 shadow-lg space-y-8"
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="space-y-8"
+                    transition={{ duration: 0.3, delay: 0.1 }}
                 >
-                    <section className="glass rounded-3xl p-8 md:p-10 border border-white/20 backdrop-blur-xl shadow-xl">
-                        <h2 className="text-2xl font-bold mb-4 flex items-center gap-3">
-                            <FiInfo className="text-blue-500" />
-                            1. Acceptance of Terms
+                    <section>
+                        <h2 className="text-xl font-black text-[var(--foreground)] mb-4 flex items-center gap-2">
+                            <FiHeart className="text-[var(--accent)]" />
+                            Welcome to ShepherdAI
                         </h2>
-                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                            By accessing or using GitBattle, you agree to be bound by these Terms of Service. If you disagree with any part of the terms, you may not access the service. GitBattle is a platform for comparing GitHub profiles and should be used for entertainment and educational purposes only.
+                        <p className="text-[var(--muted)] leading-relaxed mb-4">
+                            ShepherdAI is a faith-based conversational AI companion designed to provide spiritual guidance,
+                            prayer support, and scripture-inspired comfort. By using our service, you agree to these terms.
                         </p>
                     </section>
 
-                    <section className="glass rounded-3xl p-8 md:p-10 border border-white/20 backdrop-blur-xl shadow-xl">
-                        <h2 className="text-2xl font-bold mb-4 flex items-center gap-3">
-                            <FiShield className="text-purple-500" />
-                            2. Account Responsibilities
-                        </h2>
-                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
-                            To use certain features like the leaderboard, you must sign in using your GitHub or Google account. You are responsible for:
+                    <div className="h-px bg-gradient-to-r from-transparent via-[var(--card-border)] to-transparent" />
+
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4">1. Acceptance of Terms</h2>
+                        <p className="text-[var(--muted)] leading-relaxed mb-4">
+                            By accessing and using ShepherdAI, you accept and agree to be bound by these Terms of Service.
+                            If you do not agree to these terms, please do not use our service.
                         </p>
-                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-400">
-                            <li>Maintaining the security of your authentication tokens</li>
-                            <li>All activities that occur under your account</li>
-                            <li>Ensuring your use of the service complies with GitHub's and Google's respective policies</li>
+                    </section>
+
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4">2. Service Description</h2>
+                        <div className="space-y-3">
+                            <div className="flex items-start gap-3">
+                                <FiCheck className="text-[var(--accent)] mt-1 flex-shrink-0" />
+                                <p className="text-[var(--muted)] leading-relaxed">
+                                    <strong className="text-[var(--foreground)]">Faith Companion:</strong> AI-powered conversations focused on Christian values and biblical wisdom
+                                </p>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <FiCheck className="text-[var(--accent)] mt-1 flex-shrink-0" />
+                                <p className="text-[var(--muted)] leading-relaxed">
+                                    <strong className="text-[var(--foreground)]">Prayer Support:</strong> Guidance for prayer and spiritual reflection
+                                </p>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <FiCheck className="text-[var(--accent)] mt-1 flex-shrink-0" />
+                                <p className="text-[var(--muted)] leading-relaxed">
+                                    <strong className="text-[var(--foreground)]">Scripture Insights:</strong> References and reflections based on biblical teachings
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4">3. User Responsibilities</h2>
+                        <ul className="space-y-2 text-[var(--muted)] list-disc list-inside">
+                            <li>Use the service respectfully and in accordance with Christian values</li>
+                            <li>Do not use the service for harmful, illegal, or inappropriate purposes</li>
+                            <li>Keep your account credentials secure and confidential</li>
+                            <li>Understand that AI guidance is supplementary to, not a replacement for, professional spiritual counseling</li>
                         </ul>
                     </section>
 
-                    <section className="glass rounded-3xl p-8 md:p-10 border border-white/20 backdrop-blur-xl shadow-xl">
-                        <h2 className="text-2xl font-bold mb-4 flex items-center gap-3">
-                            <FiGithub className="text-gray-900 dark:text-white" />
-                            3. Data Usage & GitHub API
-                        </h2>
-                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                            GitBattle fetches public data from the GitHub API. We do not store your private code, repositories, or personal information beyond what is necessary to maintain the leaderboard (username, avatar, and calculated battle score). Your use of GitBattle is also subject to GitHub's Acceptable Use Policies.
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4">4. Content and Intellectual Property</h2>
+                        <p className="text-[var(--muted)] leading-relaxed mb-4">
+                            All conversations are private between you and ShepherdAI. We respect the sanctity of your spiritual
+                            journey and maintain strict confidentiality of your chats. Biblical content and scripture references
+                            remain the property of their respective sources.
                         </p>
                     </section>
 
-                    <section className="glass rounded-3xl p-8 md:p-10 border border-white/20 backdrop-blur-xl shadow-xl">
-                        <h2 className="text-2xl font-bold mb-4 flex items-center gap-3">
-                            <FiShieldOff className="text-red-500" />
-                            4. Prohibited Conduct
-                        </h2>
-                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
-                            Users agree not to:
-                        </p>
-                        <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-400">
-                            <li>Attempt to manipulate battle scores through artificial means</li>
-                            <li>Abuse or overload our infrastructure or the GitHub API</li>
-                            <li>Use the service for any illegal or unauthorized purpose</li>
-                            <li>Harass or target other developers based on their battle rankings</li>
-                        </ul>
-                    </section>
-
-                    <section className="glass rounded-3xl p-8 md:p-10 border border-white/20 backdrop-blur-xl shadow-xl">
-                        <h2 className="text-2xl font-bold mb-4">5. Limitation of Liability</h2>
-                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                            GitBattle provides weighted profile comparisons "as is." We are not liable for any discrepancies in GitHub data or any decisions made based on the rankings provided by this platform. Battle scores are calculated using a proprietary formula and do not represent a definitive measure of developer skill.
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4">5. Limitation of Liability</h2>
+                        <p className="text-[var(--muted)] leading-relaxed mb-4">
+                            ShepherdAI provides spiritual support and guidance powered by AI technology. While we strive for
+                            accuracy and helpfulness, we are not a substitute for professional religious counseling, therapy,
+                            or medical advice. For serious spiritual or mental health concerns, please consult qualified professionals.
                         </p>
                     </section>
-                </motion.div>
 
-                {/* Footer Link */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="mt-12 text-center"
-                >
-                    <p className="text-gray-500 mb-4">Questions about our terms?</p>
-                    <Link href="/contact" className="text-brand-primary font-bold hover:underline">
-                        Contact Support
-                    </Link>
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4">6. Modifications to Service</h2>
+                        <p className="text-[var(--muted)] leading-relaxed mb-4">
+                            We reserve the right to modify, suspend, or discontinue any aspect of the service at any time.
+                            We will notify users of significant changes to these terms.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4">7. Termination</h2>
+                        <p className="text-[var(--muted)] leading-relaxed mb-4">
+                            Users may delete their account at any time through the settings page. We reserve the right to
+                            terminate accounts that violate these terms or misuse the service.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-lg font-black text-[var(--foreground)] mb-4">8. Contact Us</h2>
+                        <p className="text-[var(--muted)] leading-relaxed">
+                            If you have questions about these Terms of Service, please reach out via our{" "}
+                            <Link href="/contact" className="text-[var(--accent)] hover:underline font-bold">
+                                contact page
+                            </Link>.
+                        </p>
+                    </section>
+
+                    <div className="mt-8 p-6 bg-[var(--accent)]/5 rounded-2xl border border-[var(--accent)]/20">
+                        <p className="text-xs text-[var(--muted)] text-center">
+                            By continuing to use ShepherdAI, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
+                        </p>
+                    </div>
                 </motion.div>
             </div>
-        </main>
+        </div>
     );
 }

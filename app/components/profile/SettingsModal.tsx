@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { FiX, FiSettings, FiTrash2, FiLink2, FiUser, FiAlertTriangle, FiChevronRight } from "react-icons/fi";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import toast from "react-hot-toast";
 
@@ -82,15 +82,17 @@ export default function SettingsModal({
         <AnimatePresence>
             {open && (
                 <>
+                    {/* Backdrop */}
                     <motion.div
-                        className="fixed inset-0 bg-black/40 backdrop-blur-md z-[80]"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-md z-[80]"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                     />
 
+                    {/* Modal Container - PERFECT CENTER */}
                     <motion.div
-                        className="fixed z-[1000] inset-0 flex items-center justify-center p-4 bg-transparent"
+                        className="fixed z-[90] inset-0 flex items-center justify-center p-4"
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
@@ -98,14 +100,13 @@ export default function SettingsModal({
                         onClick={onClose}
                     >
                         <div
-                            className="w-full max-w-lg bg-[var(--card)] border border-[var(--card-border)] shadow-2xl rounded-[2rem] flex flex-col h-[600px] overflow-hidden relative"
+                            className="w-full max-w-lg bg-[var(--card)] border border-[var(--card-border)] shadow-2xl rounded-[2rem] flex flex-col h-[600px] max-h-[90vh] overflow-hidden relative"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            {/* Close Button - Absolute for clarity */}
-                            {/* Close Button - Absolute for clarity */}
+                            {/* Close Button - VISIBLE EXIT */}
                             <button
                                 onClick={onClose}
-                                className="absolute top-6 right-6 p-3 rounded-2xl bg-[var(--background)] border-2 border-[var(--card-border)] hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 group transition-all z-10 shadow-xl flex items-center gap-2"
+                                className="absolute top-6 right-6 p-3 rounded-2xl bg-[var(--background)] border-2 border-[var(--card-border)] hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 group transition-all z-[100] shadow-xl flex items-center gap-2"
                                 aria-label="Close"
                             >
                                 <span className="text-[10px] font-black uppercase tracking-widest text-[var(--muted)] group-hover:text-[var(--accent)] hidden sm:block">Exit</span>

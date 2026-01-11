@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { FiX, FiSend, FiMessageSquare, FiHeart, FiClock, FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 
 type Message = {
@@ -60,13 +60,13 @@ export default function ChatModal({
     }
   }, [open, chatId, initialView]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (open && view === "history") {
       fetchHistory();
     }
   }, [open, view]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };

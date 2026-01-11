@@ -8,7 +8,6 @@ import { FiMenu, FiX, FiHeart, FiUser, FiLogOut, FiMessageSquare, FiClock, FiSet
 import ThemeToggle from "./ThemeToggle";
 import { useChat } from "./chat/ChatContext";
 import toast from "react-hot-toast";
-import SettingsModal from "./profile/SettingsModal";
 
 export default function Header() {
   const { data: session } = useSession();
@@ -16,7 +15,6 @@ export default function Header() {
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 8);
@@ -60,13 +58,13 @@ export default function Header() {
                 <FiClock size={18} />
               </button>
 
-              <button
-                onClick={() => setSettingsOpen(true)}
+              <Link
+                href="/settings"
                 className="p-2 rounded-lg hover:bg-[var(--card-border)]/20 text-[var(--foreground)] transition-all bg-[var(--background)]/40 backdrop-blur-sm sm:bg-transparent shadow-sm sm:shadow-none"
                 title="Profile Settings"
               >
                 <FiSettings size={18} />
-              </button>
+              </Link>
 
               <button
                 onClick={() => {
@@ -117,9 +115,9 @@ export default function Header() {
                   <button onClick={() => { setMobileOpen(false); openHistory(); }} className="text-left text-sm font-medium py-2 flex items-center gap-2">
                     <FiClock /> History
                   </button>
-                  <button onClick={() => { setMobileOpen(false); setSettingsOpen(true); }} className="text-left text-sm font-medium py-2 flex items-center gap-2">
+                  <Link href="/settings" onClick={() => setMobileOpen(false)} className="text-left text-sm font-medium py-2 flex items-center gap-2">
                     <FiSettings /> Settings
-                  </button>
+                  </Link>
                   <button onClick={() => signOut()} className="text-left text-sm text-red-500 font-medium py-2">
                     Sign Out
                   </button>
@@ -133,8 +131,6 @@ export default function Header() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </header>
   );
 }
