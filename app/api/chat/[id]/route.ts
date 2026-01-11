@@ -6,7 +6,7 @@ import { Chat } from "@/models/Chat.model";
 
 export async function GET(
     req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions);
@@ -14,7 +14,8 @@ export async function GET(
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const chatId = params.id;
+        const { id } = await params;
+        const chatId = id;
         await dbConnect();
 
         const chat = await Chat.findOne({ _id: chatId, userId: session.user.id });
