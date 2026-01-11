@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiX, FiSend, FiMessageSquare, FiHeart, FiClock, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 type Message = {
   id: string;
@@ -278,7 +280,24 @@ export default function ChatModal({
                               : "bg-[var(--background)] border border-[var(--card-border)] text-[var(--foreground)] rounded-tl-none shadow-black/5"
                               }`}
                           >
-                            {m.text}
+                            <div className="prose prose-sm max-w-none dark:prose-invert">
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                  p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                                  strong: ({ node, ...props }) => <strong className="font-bold" {...props} />,
+                                  em: ({ node, ...props }) => <em className="italic" {...props} />,
+                                  ul: ({ node, ...props }) => <ul className="list-disc pl-4 mb-2 space-y-1" {...props} />,
+                                  ol: ({ node, ...props }) => <ol className="list-decimal pl-4 mb-2 space-y-1" {...props} />,
+                                  li: ({ node, ...props }) => <li className="" {...props} />,
+                                  a: ({ node, ...props }) => <a className="underline hover:opacity-80 transition-opacity" target="_blank" rel="noopener noreferrer" {...props} />,
+                                  blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-[var(--accent)]/30 pl-3 my-2 italic" {...props} />,
+                                  code: ({ node, ...props }) => <code className="bg-black/10 dark:bg-white/10 px-1 py-0.5 rounded text-xs font-mono" {...props} />,
+                                }}
+                              >
+                                {m.text}
+                              </ReactMarkdown>
+                            </div>
                           </div>
                           <span className={`text-[10px] font-bold uppercase tracking-tighter text-[var(--muted)] px-1 ${m.role === "user" ? "text-right" : "text-left"}`}>
                             {formatTime(m.timestamp)}

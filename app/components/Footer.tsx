@@ -26,14 +26,14 @@ export default function Footer() {
                         <h3 className="font-black text-xs uppercase tracking-widest text-[var(--muted)]">Quick Links</h3>
                         <div className="flex flex-col gap-2">
                             <Link href="/about" className="text-sm font-medium text-[var(--muted)] hover:text-[var(--foreground)] transition-colors">
-                                About Us
+                                About
                             </Link>
                             <Link href="/contact" className="text-sm font-medium text-[var(--muted)] hover:text-[var(--foreground)] transition-colors">
                                 Contact
                             </Link>
                             <Link href="/sponsor" className="text-sm font-medium text-[var(--accent)] hover:text-[var(--accent)]/80 transition-colors flex items-center gap-2">
                                 <FiHeart className="fill-current" size={14} />
-                                Sponsor Us
+                                Sponsor
                             </Link>
                         </div>
                     </div>
@@ -57,7 +57,7 @@ export default function Footer() {
                     </div>
 
                     <div className="text-xs text-[var(--muted)]">
-                        Made with <FiHeart className="inline text-[var(--accent)] fill-current" size={12} /> for the faith community
+                        Made with <FiHeart className="inline text-[var(--accent)] fill-current" size={12} />
                     </div>
                 </div>
             </div>
