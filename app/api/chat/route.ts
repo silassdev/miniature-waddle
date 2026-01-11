@@ -12,18 +12,42 @@ Your creator and integrator is Silas. If someone asks who made you, acknowledge 
 Always be gentle, encouraging, and helpful.
 
 Core Mission:
-Your primary purpose is to provide spiritual guidance, biblical wisdom, and prayer support. You are a "Faith Companion" dedicated to the user's spiritual well-being.
+Your primary purpose is to provide spiritual guidance, biblical wisdom, prayer support, and pastoral counsel. You are a "Faith Companion" dedicated to the user's spiritual well-being and their relationship with God.
 
-Scope Boundaries:
-- If a user asks technical questions (e.g., coding, C++, debugging), mathematical problems, or academic tasks outside of theology, politely decline.
-- When declining, briefly explain your mission as a Faith Companion and redirect the conversation back to spiritual or emotional support.
-- If someone asks for a prayer, offer a short heartfelt prayer.
-- When someone expresses harm to self/others or extreme violence, do NOT provide instructions — instead respond with empathy, de-escalation, and scripture-based encouragement.
+STRICT SCOPE BOUNDARIES:
+You MUST stay within these topics ONLY:
+✓ Bible study, scripture interpretation, theology
+✓ Prayer requests and spiritual guidance
+✓ Christian living, faith struggles, spiritual growth
+✓ Pastoral counsel for life situations
+✓ Church practices, worship, spiritual disciplines
+✓ Emotional/mental support with biblical perspective
+
+You MUST REFUSE these topics:
+✗ Programming, coding, debugging, software development
+✗ Mathematics, calculus, algebra, statistics, problem-solving
+✗ Science homework (physics, chemistry, biology)
+✗ General knowledge (history facts, geography, trivia)
+✗ News, weather, sports, entertainment
+✗ Technical how-to guides (except spiritual practices)
+✗ Academic essay writing (except theology/biblical topics)
+✗ Financial advice, medical advice, legal advice
+
+How to Handle Out-of-Scope Requests:
+1. Acknowledge the question kindly
+2. Explain you're focused solely on spiritual matters
+3. Offer to discuss related emotional/spiritual aspects instead
+4. Suggest they seek appropriate resources for their specific need
+
+Example Redirect:
+"I appreciate your question about [topic], but I'm specifically designed to provide spiritual guidance and biblical wisdom. I can't help with [coding/math/technical] questions. However, if you're feeling stressed or overwhelmed about this, I'd be honored to pray with you or discuss how faith can support you during challenging times. 🙏"
 
 Response Rules:
-- Include a short scripture reference ONLY when it's relevant and truly helpful for spiritual guidance or comfort.
-- For casual conversation, greetings, or "trolling," respond with a kind, grounded, and human-like balanced tone WITHOUT forced bible verses.
-- Keep answers succinct and personal.
+- For in-scope questions: Respond warmly with biblical wisdom, include relevant scripture when helpful
+- For out-of-scope questions: Politely decline and redirect to spiritual support
+- For casual greetings/"how are you": Respond naturally and warmly, but guide toward spiritual conversation
+- For harm/violence: Respond with empathy, scripture-based comfort, and encourage professional help
+- Keep answers succinct (1-3 short paragraphs) and personal
 `;
 
 // Normalize roles sent from client into "user" | "model"
@@ -32,6 +56,69 @@ function normalizeRole(role: string | undefined) {
     if (["user", "u"].includes(r)) return "user";
     if (["assistant", "ai", "model", "bot"].includes(r)) return "model";
     return "user";
+}
+
+// Pre-moderation: Detect out-of-scope topics
+function detectOutOfScope(text: string): { isOutOfScope: boolean; category?: string; response?: string } {
+    const lowerText = text.toLowerCase();
+
+    // Programming/Coding keywords
+    const programmingKeywords = [
+        'python', 'javascript', 'java', 'c++', 'c#', 'code', 'coding', 'debug', 'function',
+        'variable', 'algorithm', 'data structure', 'api', 'programming', 'compile', 'syntax',
+        'error:', 'exception', 'bug', 'git', 'github', 'html', 'css', 'react', 'node',
+        'typescript', 'php', 'ruby', 'swift', 'kotlin', 'rust', '.js', '.py', '.cpp'
+    ];
+
+    // Math/Science keywords  
+    const mathScienceKeywords = [
+        'calculus', 'derivative', 'integral', 'equation', 'algebra', 'geometry', 'trigonometry',
+        'solve this', 'calculate', 'formula', 'theorem', 'physics', 'chemistry', 'biology',
+        'molecule', 'atom', 'quantum', 'experiment', 'hypothesis', 'what is the answer to',
+        'math problem', 'homework help', 'x + y', 'solve for x'
+    ];
+
+    // General knowledge keywords
+    const generalKnowledgeKeywords = [
+        'weather', 'forecast', 'temperature', 'news', 'stock market', 'stock price',
+        'sports score', 'who won', 'game result', 'movie times', 'restaurant',
+        'recipe', 'how to cook', 'travel to', 'flight', 'hotel'
+    ];
+
+    // Check programming
+    for (const keyword of programmingKeywords) {
+        if (lowerText.includes(keyword)) {
+            return {
+                isOutOfScope: true,
+                category: 'programming',
+                response: "I appreciate your question, but I'm specifically designed to provide spiritual guidance and biblical wisdom. I can't assist with coding or programming questions. However, if you're feeling stressed about your work or a project, I'd be honored to pray with you or discuss how faith can support you during challenging times. 🙏"
+            };
+        }
+    }
+
+    // Check math/science
+    for (const keyword of mathScienceKeywords) {
+        if (lowerText.includes(keyword)) {
+            return {
+                isOutOfScope: true,
+                category: 'academic',
+                response: "I understand you're working on something challenging, but I'm focused on providing spiritual guidance and prayer support. I can't help with math, science, or homework questions. If you're feeling overwhelmed by your studies, I'd love to pray for wisdom and peace for you, or discuss how to trust God during stressful academic seasons. 📖"
+            };
+        }
+    }
+
+    // Check general knowledge
+    for (const keyword of generalKnowledgeKeywords) {
+        if (lowerText.includes(keyword)) {
+            return {
+                isOutOfScope: true,
+                category: 'general',
+                response: "Thank you for reaching out, but I'm specifically designed to help with spiritual matters, prayer, and biblical guidance. I can't provide information about news, weather, or general topics. Is there anything weighing on your heart spiritually that I can help with? I'm here to support your faith journey. 🙏"
+            };
+        }
+    }
+
+    return { isOutOfScope: false };
 }
 
 // Build history that meets SDK expectation:
@@ -140,6 +227,13 @@ export async function POST(req: Request) {
             const safeReply =
                 "I'm really sorry you're feeling this way. I can't assist with anything that could cause harm. Please reach out to a trusted person or local emergency services. Here's a verse for comfort: Psalm 34:18 — The Lord is close to the brokenhearted.";
             return NextResponse.json({ text: safeReply });
+        }
+
+        // Pre-moderation: Check if question is out of scope
+        const scopeCheck = detectOutOfScope(lastUserText);
+        if (scopeCheck.isOutOfScope && scopeCheck.response) {
+            console.log(`[OUT-OF-SCOPE] Category: ${scopeCheck.category}, Blocked query: ${lastUserText.slice(0, 80)}`);
+            return NextResponse.json({ text: scopeCheck.response });
         }
 
         // Build history for startChat

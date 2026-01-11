@@ -30,36 +30,28 @@ async function extractEmbedding(resp: any): Promise<number[] | null> {
 }
 
 async function createEmbedding(text: string): Promise<number[]> {
-  // get embedding model handle
-  const embedModel: any = genAI.getEmbeddingModel
-    ? genAI.getEmbeddingModel({ model: EMBEDDING_MODEL })
-    : // some SDKs may use generative model handles for embedding; fallback:
-    genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
-
-  // try common SDK call names
-  let resp: any;
   try {
-    if (typeof embedModel.embedContent === "function") {
-      resp = await embedModel.embedContent({ input: text });
-    } else if (typeof embedModel.embed === "function") {
-      resp = await embedModel.embed({ input: text });
-    } else if (typeof embedModel.generateEmbedding === "function") {
-      resp = await embedModel.generateEmbedding({ input: text });
-    } else {
-      // last-resort: attempt generateContent and try to parse embedding
-      resp = await embedModel.generateContent({ input: text });
+    // Use the correct SDK method for embeddings
+    const model = genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
+    const result = await model.embedContent(text);
+
+    // Extract embedding from the response
+    // In SDK v0.24.1, the structure is result.embedding.values
+    if (result?.embedding?.values && Array.isArray(result.embedding.values)) {
+      return result.embedding.values;
     }
+
+    // Fallback: try the extractEmbedding helper
+    const embedding = await extractEmbedding(result);
+    if (!embedding) {
+      console.error("Failed to extract embedding from response:", JSON.stringify(result).slice(0, 800));
+      throw new Error("Embedding extraction failed");
+    }
+    return embedding;
   } catch (err) {
     console.error("Embedding call failed for text:", text.slice(0, 60), err);
     throw err;
   }
-
-  const embedding = await extractEmbedding(resp);
-  if (!embedding) {
-    console.error("Failed to extract embedding from response:", JSON.stringify(resp).slice(0, 800));
-    throw new Error("Embedding extraction failed");
-  }
-  return embedding;
 }
 
 /* -------------------------------
@@ -151,50 +143,7 @@ async function upsertVerse(db: any, v: { ref: string; text: string; tags: string
   await col.updateOne({ ref: v.ref }, { $set: doc }, { upsert: true });
 }
 
-async function createEmbedding(text: string) {
-  // Delegate to createEmbedding wrapper above
-  return await createEmbeddingForText(text);
-}
 
-// Wrapper to avoid name collision
-async function createEmbeddingForText(text: string) {
-  return await createEmbeddingImplementation(text);
-}
-
-async function createEmbeddingImplementation(text: string) {
-  return await createEmbeddingActual(text);
-}
-
-async function createEmbeddingActual(text: string) {
-  return await (async () => {
-    // reuse createEmbedding defined earlier in this file
-    return await createEmbeddingInternal(text);
-  })();
-}
-
-// Actual lowest-level function using SDK
-async function createEmbeddingInternal(text: string): Promise<number[]> {
-  // implement once using genAI handle above
-  const model: any = genAI.getEmbeddingModel
-    ? genAI.getEmbeddingModel({ model: EMBEDDING_MODEL })
-    : genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
-
-  let resp: any;
-  if (typeof model.embedContent === "function") {
-    resp = await model.embedContent({ input: text });
-  } else if (typeof model.embed === "function") {
-    resp = await model.embed({ input: text });
-  } else if (typeof model.generateContent === "function") {
-    // fallback
-    resp = await model.generateContent({ input: text });
-  } else {
-    throw new Error("No supported embedding method found on SDK model object");
-  }
-
-  const emb = await extractEmbedding(resp);
-  if (!emb) throw new Error("Failed to extract embedding from SDK response");
-  return emb;
-}
 
 async function main() {
   const client = await clientPromise;
