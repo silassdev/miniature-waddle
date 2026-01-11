@@ -191,6 +191,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import dbConnect from "@/lib/db";
 import { Chat } from "@/models/Chat.model";
+import { rateLimiter } from "@/utils/rateLimiter";
 
 export async function POST(req: Request) {
     try {
@@ -220,6 +221,25 @@ export async function POST(req: Request) {
         }
 
         const lastUserText = String(messages[lastUserIndex].text).trim();
+
+        // ---------------------------------------------------------
+        // GUEST RATE LIMITING
+        // ---------------------------------------------------------
+        const session = await getServerSession(authOptions);
+
+        // If user is NOT logged in, check rate limits
+        if (!session?.user?.id) {
+            // Get IP from headers (standard for Next.js/Vercel)
+            const ip = req.headers.get("x-forwarded-for") || "unknown-ip";
+
+            const limit = rateLimiter.check(ip);
+
+            if (!limit.allowed) {
+                return NextResponse.json({
+                    text: `🔒 You've reached the free specific conversation limit for guest users. \n\nPlease **Sign In** or **Create an Account** to continue your spiritual journey with ShepherdAI freely! It only takes a moment. 🙏`
+                });
+            }
+        }
 
         // Quick local safety filter
         const violentPattern = /(kill|bomb|shoot|harm yourself|hurt yourself|suicide|self[- ]harm|hurt someone)/i;
@@ -256,7 +276,7 @@ export async function POST(req: Request) {
         const text = await extractTextFromResult(result);
 
         // --- Database Persistence ---
-        const session = await getServerSession(authOptions);
+        // Reuse 'session' from above
         let finalChatId = chatId;
 
         if (session?.user?.id) {
