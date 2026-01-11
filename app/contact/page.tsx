@@ -88,7 +88,7 @@ export default function ContactPage() {
                             transition={{ delay: 0.2 }}
                             className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
                         >
-                            Have a question about rankings, feedback on visualizations, or just want to say hi? We'd love to hear from you.
+                            Have a question about a bible verse, feedback on the AI, or just want to say hi? We'd love to hear from you.
                         </motion.p>
                     </div>
 
@@ -112,7 +112,7 @@ export default function ContactPage() {
                                         </div>
                                         <div>
                                             <p className="font-bold text-sm text-gray-400 uppercase tracking-wider">Email Us</p>
-                                            <p className="text-gray-700 dark:text-gray-200 font-medium">support@gitbattle.com</p>
+                                            <p className="text-gray-700 dark:text-gray-200 font-medium">support@shepherd.ai</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-4">
@@ -121,7 +121,7 @@ export default function ContactPage() {
                                         </div>
                                         <div>
                                             <p className="font-bold text-sm text-gray-400 uppercase tracking-wider">Socials</p>
-                                            <p className="text-gray-700 dark:text-gray-200 font-medium">@gitbattle_app</p>
+                                            <p className="text-gray-700 dark:text-gray-200 font-medium">@shepherd_ai</p>
                                         </div>
                                     </div>
                                 </div>
@@ -183,7 +183,7 @@ export default function ContactPage() {
                                             name="subject"
                                             value={formData.subject}
                                             onChange={handleChange}
-                                            placeholder="How do rankings work?"
+                                            placeholder="I have a question about..."
                                             className="w-full px-5 py-4 rounded-2xl bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-brand-primary outline-none transition-all"
                                         />
                                     </div>

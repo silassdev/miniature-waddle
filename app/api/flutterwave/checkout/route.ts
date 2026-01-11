@@ -14,16 +14,16 @@ export async function POST(req: Request) {
         const body = {
             tx_ref,
             amount: String(amount || '50'),
-            currency: 'USD',
+            currency: 'NGN',
             redirect_url: `${domain}/sponsor/flutterwave-callback`,
             customer: {
-                email: 'guest@shepherdai.com', // In a real app, collect this from the user
+                email: 'guest@shepherdai.com',
                 name: 'ShepherdAI Supporter',
             },
             customizations: {
                 title: 'ShepherdAI Sponsorship',
                 description: 'Support ShepherdAI Mission',
-                logo: `${domain}/logo.png`, // Optional: Add your logo URL 
+                logo: `${domain}/logo.png`,
             },
         };
 

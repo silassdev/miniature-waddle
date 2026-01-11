@@ -2,99 +2,78 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { FiArrowLeft, FiHeart, FiMail, FiDollarSign, FiGift, FiUsers, FiGithub } from "react-icons/fi";
-import { useState } from "react";
+import { FiArrowLeft, FiHeart, FiMail, FiDollarSign, FiGithub, FiCheck } from "react-icons/fi";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
-import { loadStripe } from "@stripe/stripe-js";
+import PaymentStatusModal from "../components/PaymentStatusModal";
 
 // Replace with your GitHub sponsor URL or repo URL
 const GITHUB_SPONSOR_URL = process.env.NEXT_PUBLIC_GITHUB_SPONSOR_URL || "https://github.com/sponsors/your-username";
 
-export default function SponsorPage() {
-    const [formData, setFormData] = useState({
-        name: "",
-        email: "",
-        organization: "",
-        amount: "",
-        message: "",
-    });
+type Currency = "USD" | "NGN";
+
+function SponsorContent() {
+    const [amount, setAmount] = useState("");
+    const [currency, setCurrency] = useState<Currency>("USD");
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
+    // Modal State
+    const [showStatusModal, setShowStatusModal] = useState(false);
+    const [statusType, setStatusType] = useState<"success" | "failure">("failure");
 
-        // Send a sponsorship request to your backend (optional)
-        try {
-            const res = await fetch('/api/sponsor/request', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
+    const searchParams = useSearchParams();
+    const router = useRouter();
 
-            if (!res.ok) throw new Error('Failed to submit request');
-
-            toast.success("Thank you for your sponsorship interest! We'll be in touch soon.");
-            setFormData({ name: "", email: "", organization: "", amount: "", message: "" });
-        } catch (err: any) {
-            console.error(err);
-            toast.error(err?.message || 'Failed to submit sponsorship request');
-        } finally {
-            setLoading(false);
+    useEffect(() => {
+        // Check for cancellation/failure params
+        if (searchParams.get('canceled')) {
+            setStatusType('failure');
+            setShowStatusModal(true);
+            // Clean up URL
+            router.replace('/sponsor');
         }
-    };
+    }, [searchParams, router]);
 
-    // Open GitHub Sponsors (or repo) in a new tab
+    // Open GitHub Sponsors
     const openGithubSponsor = () => {
         window.open(GITHUB_SPONSOR_URL, '_blank', 'noopener,noreferrer');
     };
 
-    // Start Stripe Checkout (calls backend to create a session)
-    const handleStripeCheckout = async (amountValue?: string) => {
-        try {
-            setLoading(true);
-            const body = { amount: amountValue || formData.amount };
-            const res = await fetch('/api/stripe/checkout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data?.message || 'Failed to create Stripe session');
+    const handleDonate = async () => {
+        if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+            toast.error("Please enter a valid donation amount");
+            return;
+        }
 
-            if (data.url) {
-                window.location.href = data.url;
+        setLoading(true);
+        try {
+            if (currency === "USD") {
+                // Stripe Checkout
+                const res = await fetch('/api/stripe/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data?.message || 'Failed to create Stripe session');
+                if (data.url) window.location.href = data.url;
+                else throw new Error('No checkout URL returned');
             } else {
-                throw new Error('No checkout URL returned from server');
+                // Flutterwave Checkout
+                const res = await fetch('/api/flutterwave/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data?.message || 'Failed to create Flutterwave payment');
+                if (data.checkoutUrl) window.open(data.checkoutUrl, '_blank', 'noopener,noreferrer');
+                else throw new Error('No checkout URL returned');
             }
         } catch (err: any) {
             console.error(err);
-            toast.error(err?.message || 'Stripe checkout failed');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Start Flutterwave checkout (calls backend to create a payment link)
-    const handleFlutterwaveCheckout = async (amountValue?: string) => {
-        try {
-            setLoading(true);
-            const body = { amount: amountValue || formData.amount };
-            const res = await fetch('/api/flutterwave/checkout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data?.message || 'Failed to create Flutterwave payment');
-
-            const { checkoutUrl } = data;
-            if (!checkoutUrl) throw new Error('No checkout URL returned from Flutterwave');
-
-            window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
-        } catch (err: any) {
-            console.error(err);
-            toast.error(err?.message || 'Flutterwave checkout failed');
+            toast.error(err?.message || 'Payment initiation failed');
         } finally {
             setLoading(false);
         }
@@ -102,7 +81,13 @@ export default function SponsorPage() {
 
     return (
         <div className="min-h-screen bg-[var(--background)] py-12 px-4">
-            <div className="max-w-4xl mx-auto">
+            <PaymentStatusModal
+                isOpen={showStatusModal}
+                onClose={() => setShowStatusModal(false)}
+                type={statusType}
+            />
+
+            <div className="max-w-3xl mx-auto">
                 <Link
                     href="/"
                     className="inline-flex items-center gap-2 text-sm font-bold text-[var(--muted)] hover:text-[var(--foreground)] transition-colors mb-8"
@@ -112,189 +97,126 @@ export default function SponsorPage() {
                 </Link>
 
                 <motion.div
-                    className="bg-gradient-to-br from-[var(--accent)]/5 via-purple-500/5 to-blue-500/5 border border-[var(--card-border)] rounded-3xl p-8 mb-6 shadow-lg"
+                    className="bg-gradient-to-br from-[var(--accent)]/5 via-purple-500/5 to-blue-500/5 border border-[var(--card-border)] rounded-3xl p-8 mb-6 shadow-lg relative overflow-hidden"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                 >
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="w-16 h-16 rounded-2xl bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)] shadow-inner">
-                            <FiHeart size={32} className="fill-current" />
+                    <div className="absolute top-0 right-0 p-12 bg-gradient-to-br from-[var(--accent)]/10 to-transparent blur-3xl rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+
+                    <div className="flex flex-col md:flex-row items-center gap-6 mb-8 text-center md:text-left">
+                        <div className="w-20 h-20 rounded-2xl bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)] shadow-inner">
+                            <FiHeart size={40} className="fill-current" />
                         </div>
                         <div>
-                            <h1 className="font-black text-3xl tracking-tight text-[var(--foreground)]">Sponsor ShepherdAI</h1>
-                            <p className="text-sm font-bold text-[var(--muted)] uppercase tracking-widest mt-1">Support Our Mission</p>
+                            <h1 className="font-black text-3xl tracking-tight text-[var(--foreground)]">Support ShepherdAI</h1>
+                            <p className="text-[var(--muted)] leading-relaxed mt-2 max-w-lg">
+                                Your generosity helps us maintain this free resource and bring spiritual guidance to more people worldwide.
+                            </p>
                         </div>
                     </div>
-                    <p className="text-[var(--muted)] leading-relaxed mt-4">
-                        Help us bring spiritual guidance and biblical wisdom to more people around the world.
-                        Your sponsorship enables us to maintain and improve ShepherdAI as a free, faith-based resource.
-                    </p>
 
-                    {/* GitHub Sponsor button */}
-                    <div className="mt-6 flex gap-3">
-                        <button
-                            onClick={openGithubSponsor}
-                            className="inline-flex items-center gap-2 px-5 py-3 bg-gray-900 text-white rounded-2xl font-bold hover:opacity-90 transition-all"
-                            title="Sponsor on GitHub"
-                        >
-                            <FiGithub />
-                            Sponsor on GitHub
-                        </button>
-
-                        <button
-                            onClick={() => handleStripeCheckout('50')}
-                            className="inline-flex items-center gap-2 px-5 py-3 bg-[#635BFF] text-white rounded-2xl font-bold hover:opacity-90 transition-all"
-                            title="Pay with Stripe - $50"
-                        >
-                            <FiDollarSign />
-                            Quick Donate $50 (Stripe)
-                        </button>
-
-                        <button
-                            onClick={() => handleFlutterwaveCheckout('50')}
-                            className="inline-flex items-center gap-2 px-5 py-3 bg-[#00ADEF] text-white rounded-2xl font-bold hover:opacity-90 transition-all"
-                            title="Pay with Flutterwave - $50"
-                        >
-                            <FiDollarSign />
-                            Quick Donate $50 (Flutterwave)
-                        </button>
-                    </div>
-                </motion.div>
-
-                {/* The rest of your original form and content remains unchanged - using the form below users can also pick amounts and submit */}
-
-                <motion.div
-                    className="bg-[var(--card)] border border-[var(--card-border)] rounded-3xl p-8 shadow-lg"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.3 }}
-                >
-                    <div className="flex items-center gap-3 mb-6">
-                        <FiDollarSign className="text-[var(--accent)]" size={24} />
-                        <h2 className="text-2xl font-black text-[var(--foreground)]">Sponsorship Request</h2>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* ... keep your existing fields ... (omitted to keep file concise) ... */}
-
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="text-xs font-bold text-[var(--muted)] uppercase tracking-wider ml-1 mb-2 block">Your Name *</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 ring-[var(--accent)]/20 outline-none transition-all"
-                                    placeholder="John Doe"
-                                />
+                    <div className="grid gap-6">
+                        {/* GitHub Sponsor Option */}
+                        <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm hover:shadow-md transition-all">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-xl">
+                                    <FiGithub size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-[var(--foreground)]">GitHub Sponsors</h3>
+                                    <p className="text-xs text-[var(--muted)] font-medium">Recurring support for the developer</p>
+                                </div>
                             </div>
-                            <div>
-                                <label className="text-xs font-bold text-[var(--muted)] uppercase tracking-wider ml-1 mb-2 block">Email Address *</label>
-                                <input
-                                    type="email"
-                                    required
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 ring-[var(--accent)]/20 outline-none transition-all"
-                                    placeholder="john@example.com"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="text-xs font-bold text-[var(--muted)] uppercase tracking-wider ml-1 mb-2 block">Organization (Optional)</label>
-                                <input
-                                    type="text"
-                                    value={formData.organization}
-                                    onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                                    className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 ring-[var(--accent)]/20 outline-none transition-all"
-                                    placeholder="Your Church or Company"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold text-[var(--muted)] uppercase tracking-wider ml-1 mb-2 block">Sponsorship Amount</label>
-                                <select
-                                    value={formData.amount}
-                                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                                    className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 ring-[var(--accent)]/20 outline-none transition-all"
-                                >
-                                    <option value="">Select an amount</option>
-                                    <option value="10">$10 - Supporter</option>
-                                    <option value="50">$50 - Patron</option>
-                                    <option value="100">$100 - Benefactor</option>
-                                    <option value="500">$500 - Major Sponsor</option>
-                                    <option value="custom">Custom Amount</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="text-xs font-bold text-[var(--muted)] uppercase tracking-wider ml-1 mb-2 block">Message (Optional)</label>
-                            <textarea
-                                rows={4}
-                                value={formData.message}
-                                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 ring-[var(--accent)]/20 outline-none transition-all resize-none"
-                                placeholder="Tell us about your interest in sponsoring ShepherdAI..."
-                            />
-                        </div>
-
-                        <div className="grid md:grid-cols-3 gap-3">
                             <button
-                                type="submit"
-                                disabled={loading}
-                                className="col-span-2 w-full py-5 bg-gradient-to-r from-[var(--accent)] to-blue-600 text-white text-sm font-black uppercase tracking-widest rounded-2xl hover:shadow-lg hover:shadow-[var(--accent)]/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={openGithubSponsor}
+                                className="px-5 py-2.5 bg-gray-900 text-white dark:bg-white dark:text-black rounded-xl font-bold text-sm hover:opacity-90 transition-all w-full sm:w-auto"
                             >
-                                {loading ? "Submitting..." : "Submit Sponsorship Request"}
+                                Sponsor on GitHub
                             </button>
+                        </div>
 
-                            <div className="w-full">
+                        {/* Direct Donation Card */}
+                        <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-8 shadow-lg relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-[var(--accent)]" />
+
+                            <h3 className="font-black text-xl text-[var(--foreground)] mb-6 flex items-center gap-2">
+                                <FiDollarSign className="text-[var(--accent)]" />
+                                Make a One-Time Donation
+                            </h3>
+
+                            <div className="space-y-6">
+                                {/* Currency Toggle */}
+                                <div>
+                                    <label className="text-xs font-bold text-[var(--muted)] uppercase tracking-wider mb-2 block">Choose Currency</label>
+                                    <div className="flex bg-[var(--background)] p-1 rounded-xl border border-[var(--card-border)] w-fit">
+                                        {(["USD", "NGN"] as const).map((c) => (
+                                            <button
+                                                key={c}
+                                                onClick={() => setCurrency(c)}
+                                                className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${currency === c
+                                                        ? "bg-[var(--accent)] text-white shadow-md"
+                                                        : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                                                    }`}
+                                            >
+                                                {c}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Amount Input */}
+                                <div>
+                                    <label className="text-xs font-bold text-[var(--muted)] uppercase tracking-wider mb-2 block">Enter Amount</label>
+                                    <div className="relative">
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted)] font-black text-lg">
+                                            {currency === "USD" ? "$" : "₦"}
+                                        </div>
+                                        <input
+                                            type="number"
+                                            value={amount}
+                                            onChange={(e) => setAmount(e.target.value)}
+                                            placeholder="0.00"
+                                            className="w-full bg-[var(--background)] border border-[var(--card-border)] rounded-xl pl-10 pr-6 py-4 text-2xl font-bold focus:ring-4 ring-[var(--accent)]/10 focus:border-[var(--accent)] outline-none transition-all"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Donate Button */}
                                 <button
-                                    type="button"
-                                    onClick={() => {
-                                        // If custom amount selected, prompt user
-                                        let amount = formData.amount;
-                                        if (!amount || amount === 'custom') {
-                                            amount = window.prompt('Enter custom amount in USD (numbers only):', '25') || '';
-                                        }
-                                        if (!amount) return;
-
-                                        // Let the user choose Stripe or Flutterwave via confirm (quick UI)
-                                        const useStripe = confirm('Pay with Stripe? Cancel to pay with Flutterwave');
-                                        if (useStripe) handleStripeCheckout(amount);
-                                        else handleFlutterwaveCheckout(amount);
-                                    }}
-                                    className="w-full py-5 border border-[var(--card-border)] rounded-2xl text-sm font-bold"
+                                    onClick={handleDonate}
+                                    disabled={loading || !amount}
+                                    className="w-full py-4 bg-gradient-to-r from-[var(--accent)] to-blue-600 text-white text-base font-black uppercase tracking-widest rounded-xl hover:shadow-xl hover:shadow-[var(--accent)]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99]"
                                 >
-                                    Donate / Pay Now
+                                    {loading ? "Processing..." : `Donate ${currency === "USD" ? "$" : "₦"}${amount || "0"} via ${currency === "USD" ? "Stripe" : "Flutterwave"}`}
                                 </button>
+
+                                <div className="text-center">
+                                    <p className="text-xs text-[var(--muted)]">
+                                        <FiCheck className="inline mr-1 text-emerald-500" />
+                                        Secure payment processing by {currency === "USD" ? "Stripe" : "Flutterwave"}
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </form>
-
-                    <div className="mt-6 p-4 bg-[var(--accent)]/5 rounded-2xl border border-[var(--accent)]/20">
-                        <p className="text-xs text-center text-[var(--muted)]">
-                            <FiMail className="inline mr-2" />
-                            Have questions? Reach out to us at {" "}
-                            <Link href="/contact" className="text-[var(--accent)] hover:underline font-bold">our contact page</Link>
-                        </p>
                     </div>
                 </motion.div>
 
-                <motion.div
-                    className="mt-6 bg-gradient-to-r from-[var(--accent)]/5 to-blue-500/5 border border-[var(--card-border)] rounded-3xl p-8 text-center shadow-lg"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.4 }}
-                >
-                    <FiHeart className="w-12 h-12 text-[var(--accent)] mx-auto mb-4 fill-current" />
-                    <h3 className="text-xl font-black text-[var(--foreground)] mb-2">Thank You for Your Support! 🙏</h3>
-                    <p className="text-[var(--muted)] max-w-2xl mx-auto">Every contribution, no matter the size, helps us continue our mission of providing accessible spiritual guidance through AI technology. Your generosity blesses countless lives.</p>
-                </motion.div>
+                <div className="text-center">
+                    <p className="text-xs text-[var(--muted)]">
+                        Have questions? Reach out to us at {" "}
+                        <Link href="/contact" className="text-[var(--accent)] hover:underline font-bold">our contact page</Link>
+                    </p>
+                </div>
             </div>
         </div>
+    );
+}
+
+export default function SponsorPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <SponsorContent />
+        </Suspense>
     );
 }
