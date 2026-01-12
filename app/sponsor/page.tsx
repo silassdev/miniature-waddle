@@ -117,15 +117,14 @@ function SponsorContent() {
                     </div>
 
                     <div className="grid gap-6">
-                        {/* GitHub Sponsor Option */}
                         <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm hover:shadow-md transition-all">
                             <div className="flex items-center gap-3">
                                 <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-xl">
                                     <FiGithub size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-[var(--foreground)]">GitHub Sponsors</h3>
-                                    <p className="text-xs text-[var(--muted)] font-medium">Recurring support for the developer</p>
+                                    <h3 className="font-bold text-[var(--foreground)]">GitHub</h3>
+                                    <p className="text-xs text-[var(--muted)] font-medium">One Time or Recurring support on Github</p>
                                 </div>
                             </div>
                             <button
@@ -136,7 +135,6 @@ function SponsorContent() {
                             </button>
                         </div>
 
-                        {/* Direct Donation Card */}
                         <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-8 shadow-lg relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-1 h-full bg-[var(--accent)]" />
 
@@ -146,7 +144,6 @@ function SponsorContent() {
                             </h3>
 
                             <div className="space-y-6">
-                                {/* Currency Toggle */}
                                 <div>
                                     <label className="text-xs font-bold text-[var(--muted)] uppercase tracking-wider mb-2 block">Choose Currency</label>
                                     <div className="flex bg-[var(--background)] p-1 rounded-xl border border-[var(--card-border)] w-fit">
@@ -155,8 +152,8 @@ function SponsorContent() {
                                                 key={c}
                                                 onClick={() => setCurrency(c)}
                                                 className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${currency === c
-                                                        ? "bg-[var(--accent)] text-white shadow-md"
-                                                        : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                                                    ? "bg-[var(--accent)] text-white shadow-md"
+                                                    : "text-[var(--muted)] hover:text-[var(--foreground)]"
                                                     }`}
                                             >
                                                 {c}
@@ -165,7 +162,6 @@ function SponsorContent() {
                                     </div>
                                 </div>
 
-                                {/* Amount Input */}
                                 <div>
                                     <label className="text-xs font-bold text-[var(--muted)] uppercase tracking-wider mb-2 block">Enter Amount</label>
                                     <div className="relative">
@@ -182,7 +178,6 @@ function SponsorContent() {
                                     </div>
                                 </div>
 
-                                {/* Donate Button */}
                                 <button
                                     onClick={handleDonate}
                                     disabled={loading || !amount}

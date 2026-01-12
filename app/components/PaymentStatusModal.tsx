@@ -19,7 +19,6 @@ export default function PaymentStatusModal({ isOpen, onClose, type }: PaymentSta
         <AnimatePresence>
             {isOpen && (
                 <>
-                    {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -27,7 +26,6 @@ export default function PaymentStatusModal({ isOpen, onClose, type }: PaymentSta
                         onClick={onClose}
                         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
                     >
-                        {/* Modal */}
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -35,11 +33,9 @@ export default function PaymentStatusModal({ isOpen, onClose, type }: PaymentSta
                             onClick={(e) => e.stopPropagation()}
                             className="bg-[var(--card)] border border-[var(--card-border)] w-full max-w-md rounded-3xl p-8 relative shadow-2xl overflow-hidden text-center"
                         >
-                            {/* Decorative Background */}
                             <div className={`absolute top-0 left-0 w-full h-2 ${isSuccess ? 'bg-gradient-to-r from-emerald-400 to-green-500' : 'bg-gradient-to-r from-red-500 to-pink-600'}`} />
                             <div className={`absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl opacity-20 ${isSuccess ? 'bg-emerald-500' : 'bg-red-500'}`} />
 
-                            {/* Icon */}
                             <div className="mb-6 relative inline-block">
                                 <div className={`w-24 h-24 rounded-full flex items-center justify-center text-4xl mb-4 mx-auto shadow-inner ${isSuccess ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
                                     {isSuccess ? '😇' : '😔'}
@@ -49,17 +45,15 @@ export default function PaymentStatusModal({ isOpen, onClose, type }: PaymentSta
                                 </div>
                             </div>
 
-                            {/* Content */}
                             <h2 className="text-3xl font-black text-[var(--foreground)] mb-3">
                                 {isSuccess ? "Thank You!" : "Oh no!"}
                             </h2>
                             <p className="text-[var(--muted)] text-lg leading-relaxed mb-8">
                                 {isSuccess
-                                    ? "You're an angel! Your generosity helps us keep the light of wisdom burning bright. We appreciate you! ❤️"
+                                    ? "Thank You for your support! Your generosity helps us keep the light of wisdom burning bright. We appreciate you! ❤️"
                                     : "Something went wrong with your donation. Don't worry, no funds were taken. Want to try again?"}
                             </p>
 
-                            {/* Actions */}
                             <div className="flex flex-col gap-3">
                                 {isSuccess ? (
                                     <Link

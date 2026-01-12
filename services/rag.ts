@@ -1,10 +1,3 @@
-// services/rag.ts
-// Minimal RAG utilities: create & store verse docs with embeddings, and query top-k verses.
-// Uses MongoDB (a small verses collection with shape: { ref, text, embedding: number[] }).
-//
-// IMPORTANT: supply an implementation for createEmbedding(text) that calls your embedding model
-// (text-embedding-004). Example usage with your Gemini client is shown in comments below.
-
 import clientPromise from "../lib/mongodb";
 import type { Document } from "mongodb";
 

@@ -65,7 +65,6 @@ export default function RegisterPage() {
 
     return (
         <main className="relative min-h-screen flex items-center justify-center overflow-hidden">
-            {/* Animated Background */}
             <div className="absolute inset-0 -z-10">
                 <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-full blur-3xl animate-pulse"
                     style={{ animationDuration: '4s' }} />
@@ -79,7 +78,6 @@ export default function RegisterPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="max-w-md mx-auto"
                 >
-                    {/* Header */}
                     <div className="text-center mb-10">
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
@@ -109,7 +107,6 @@ export default function RegisterPage() {
                         </motion.p>
                     </div>
 
-                    {/* Form Card */}
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}

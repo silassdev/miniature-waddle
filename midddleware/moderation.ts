@@ -1,6 +1,3 @@
-// middleware/moderation.ts
-// Simple server-side moderation/filter. Fail-closed: block or redirect out-of-scope/harmful queries.
-
 export type ModerationResult =
   | { allowed: true }
   | { allowed: false; reason: string; safeReply?: string };
@@ -12,7 +9,6 @@ const BLOCK_PATTERNS: RegExp[] = [
   /\b(illegal|steal|hack bank|download movies|crack license)\b/i,
 ];
 
-// If you want to treat "technical programming" as out-of-scope, add here
 const TECH_OUT_OF_SCOPE_PATTERNS: RegExp[] = [
   /\b(write a malware|ddos|how to hack|exploit)\b/i,
 ];
@@ -44,6 +40,5 @@ export function moderateUserInput(text: string): ModerationResult {
     }
   }
 
-  // default allow
   return { allowed: true };
 }

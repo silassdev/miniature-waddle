@@ -96,7 +96,6 @@ export default function SettingsPage() {
                     </div>
                 </motion.div>
 
-                {/* Profile Section */}
                 <motion.div
                     className="bg-[var(--card)] border border-[var(--card-border)] rounded-3xl p-8 mb-6 shadow-lg"
                     initial={{ opacity: 0, y: 20 }}
@@ -128,7 +127,6 @@ export default function SettingsPage() {
                     </div>
                 </motion.div>
 
-                {/* Account Connections */}
                 <motion.div
                     className="bg-[var(--card)] border border-[var(--card-border)] rounded-3xl p-8 mb-6 shadow-lg"
                     initial={{ opacity: 0, y: 20 }}
@@ -158,7 +156,6 @@ export default function SettingsPage() {
                     </div>
                 </motion.div>
 
-                {/* Danger Zone */}
                 <motion.div
                     className="bg-[var(--card)] border-2 border-red-500/20 rounded-3xl p-8 shadow-lg"
                     initial={{ opacity: 0, y: 20 }}

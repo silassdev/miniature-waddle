@@ -49,7 +49,6 @@ export default function ContactPage() {
 
     return (
         <main className="relative min-h-screen overflow-hidden">
-            {/* Animated Background */}
             <div className="absolute inset-0 -z-10">
                 <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-full blur-3xl animate-pulse"
                     style={{ animationDuration: '6s' }} />
@@ -59,7 +58,6 @@ export default function ContactPage() {
 
             <div className="container py-20">
                 <div className="max-w-5xl mx-auto">
-                    {/* Header */}
                     <div className="text-center mb-16">
                         <motion.div
                             initial={{ opacity: 0, y: -20 }}
@@ -93,7 +91,6 @@ export default function ContactPage() {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
-                        {/* Info Section */}
                         <motion.div
                             initial={{ opacity: 0, x: -30 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -112,7 +109,7 @@ export default function ContactPage() {
                                         </div>
                                         <div>
                                             <p className="font-bold text-sm text-gray-400 uppercase tracking-wider">Email Us</p>
-                                            <p className="text-gray-700 dark:text-gray-200 font-medium">support@shepherd.ai</p>
+                                            <p className="text-gray-700 dark:text-gray-200 font-medium">9thshila@gmail.com</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-4">
@@ -133,7 +130,6 @@ export default function ContactPage() {
                             </Link>
                         </motion.div>
 
-                        {/* Form Section */}
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}

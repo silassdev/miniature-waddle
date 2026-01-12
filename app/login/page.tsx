@@ -174,7 +174,6 @@ export default function LoginPage() {
                         </p>
                     </motion.div>
 
-                    {/* Help/Support */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}

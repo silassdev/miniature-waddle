@@ -155,7 +155,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Login Overlay Gradient */}
               {!session && (
                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--card)] via-[var(--card)]/90 to-transparent flex flex-col items-center justify-end pb-12 px-6 text-center">
                   <div className="p-4 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 space-y-4 max-w-sm shadow-2xl transform translate-y-4">
@@ -186,7 +185,6 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* Feature Pills */}
         <div className="flex flex-wrap justify-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-1000">
           {["Morning Reflections", "Prayer Support", "Biblical Wisdom", "Daily Encouragement"].map((p) => (
             <button

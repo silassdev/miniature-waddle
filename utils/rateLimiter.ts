@@ -9,8 +9,8 @@ type RateLimitEntry = {
 const requestStore = new Map<string, RateLimitEntry>();
 
 // Configuration
-const WINDOW_MS = 60 * 60 * 1000; // 1 hour window
-const MAX_REQUESTS = 5; // 5 requests per window for guests
+const WINDOW_MS = 60 * 60 * 1000;
+const MAX_REQUESTS = 5;
 
 export const rateLimiter = {
     check: (ip: string) => {
@@ -28,22 +28,21 @@ export const rateLimiter = {
 
         // Check if limit exceeded
         if (entry.count >= MAX_REQUESTS) {
-            return { 
-                allowed: false, 
+            return {
+                allowed: false,
                 remaining: 0,
-                resetIn: Math.ceil((entry.resetTime - now) / 1000) 
+                resetIn: Math.ceil((entry.resetTime - now) / 1000)
             };
         }
 
         // Increment count
         entry.count++;
-        return { 
-            allowed: true, 
-            remaining: MAX_REQUESTS - entry.count 
+        return {
+            allowed: true,
+            remaining: MAX_REQUESTS - entry.count
         };
     },
-    
-    // Optional: Prune expired entries to prevent memory leaks in long-running processes
+
     cleanup: () => {
         const now = Date.now();
         for (const [key, val] of requestStore.entries()) {
