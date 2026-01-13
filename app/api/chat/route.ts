@@ -1,14 +1,13 @@
-// app/api/chat/route.ts
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = process.env.GEMINI_API_KEY || "";
+const API_KEY = process.env.GEMINI_API_KEY;
 if (!API_KEY) console.warn("GEMINI_API_KEY not found in env");
 
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 const SYSTEM_PROMPT = `You are ShepherdAI, a compassionate Christian conversational assistant.
-Your creator and integrator is Silas. If someone asks who made you, acknowledge Silas with gratitude.
+Your creator and integrator is Silas Tyokaha a Founder and Entrepreneur who loves coding web apps and programming. If someone asks who made you, acknowledge Silas (silassdev) with gratitude.
 Always be gentle, encouraging, and helpful.
 
 Core Mission:
@@ -207,7 +206,6 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "No messages provided" }, { status: 400 });
         }
 
-        // Find index of last user message (this will be the current input)
         let lastUserIndex = -1;
         for (let i = messages.length - 1; i >= 0; i--) {
             if (normalizeRole(messages[i].role) === "user" && String(messages[i].text || "").trim()) {
@@ -229,7 +227,6 @@ export async function POST(req: Request) {
 
         // If user is NOT logged in, check rate limits
         if (!session?.user?.id) {
-            // Get IP from headers (standard for Next.js/Vercel)
             const ip = req.headers.get("x-forwarded-for") || "unknown-ip";
 
             const limit = rateLimiter.check(ip);
