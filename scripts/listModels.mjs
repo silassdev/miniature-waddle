@@ -1,9 +1,4 @@
-// scripts/listModels.mjs
 import 'dotenv/config';
-// Node 18+ required (native fetch)
-// Usage:
-//  GENERATIVE_API_KEY=YOUR_KEY node scripts/listModels.mjs
-//  or
 //  GENERATIVE_OAUTH_TOKEN=YOUR_OAUTH_TOKEN node scripts/listModels.mjs
 
 const API_URL = "https://generativelanguage.googleapis.com/v1/models";
