@@ -11,14 +11,14 @@ export async function GET(req: Request) {
         }
 
         // admin check: see env ADMIN_EMAILS
-        const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+        const adminEmails = (process.env.ADMIN_EMAILS).split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
         const userEmail = (session.user as any).email?.toLowerCase();
         if (!adminEmails.includes(userEmail)) {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
         const client = await clientPromise;
-        const db = client.db(process.env.MONGODB_DB || "shepherdai");
+        const db = client.db(process.env.MONGODB_DB);
         const col = db.collection("feedback");
 
         // simple filters: ?status=new&minRating=3
@@ -43,7 +43,7 @@ export async function GET(req: Request) {
 export async function PATCH(req: Request) {
     try {
         const session = await getServerSession(authOptions);
-        const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+        const adminEmails = (process.env.ADMIN_EMAILS).split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
         const userEmail = (session?.user as any)?.email?.toLowerCase();
         if (!session || !adminEmails.includes(userEmail)) {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -57,7 +57,7 @@ export async function PATCH(req: Request) {
         }
 
         const client = await clientPromise;
-        const db = client.db(process.env.MONGODB_DB || "shepherdai");
+        const db = client.db(process.env.MONGODB_DB);
         const col = db.collection("feedback");
 
         const { acknowledged } = await col.updateOne({ _id: new (require("mongodb").ObjectId)(id) }, { $set: { status } });
