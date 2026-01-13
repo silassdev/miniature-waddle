@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 
         const unitAmount = Math.round(numAmount * 100);
 
-        const domain = process.env.NEXT_PUBLIC_DOMAIN || 'http://localhost:3001';
+        const domain = process.env.NEXT_PUBLIC_DOMAIN;
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
             ],
             mode: 'payment',
             success_url: `${domain}/sponsor/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${domain}/sponsor`, // Redirect back to sponsor page on cancel
+            cancel_url: `${domain}/sponsor`,
         });
 
         return NextResponse.json({
