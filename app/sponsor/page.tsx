@@ -8,8 +8,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import PaymentStatusModal from "../components/PaymentStatusModal";
 
-// Replace with your GitHub sponsor URL or repo URL
-const GITHUB_SPONSOR_URL = process.env.NEXT_PUBLIC_GITHUB_SPONSOR_URL || "https://github.com/sponsors/your-username";
+
+const GITHUB_SPONSOR_URL = process.env.NEXT_PUBLIC_GITHUB_SPONSOR_URL;
 
 type Currency = "USD" | "NGN";
 
