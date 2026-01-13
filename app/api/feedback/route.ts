@@ -13,7 +13,6 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid rating (1-5 required)" }, { status: 400 });
         }
 
-        // try to get session (optional): store userId/email if signed in
         let userId = null;
         let userEmail = null;
         try {
@@ -27,7 +26,7 @@ export async function POST(req: Request) {
         }
 
         const client = await clientPromise;
-        const db = client.db(process.env.MONGODB_DB || "shepherdai");
+        const db = client.db(process.env.MONGODB_DB);
         const col = db.collection("feedback");
 
         const doc = {
