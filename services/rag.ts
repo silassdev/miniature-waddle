@@ -69,7 +69,7 @@ export async function indexVerse(ref: string, text: string) {
 }
 
 /* ---------------------------
-   Query top-k verses (simple in-memory similarity)
+   Query top-k verses (for in-memory similarity)
    - Good for prototyping with the full Bible (~31k verses).
    - For production, use Atlas Vector Search or a vector DB.
    --------------------------- */
@@ -85,7 +85,7 @@ export async function queryTopKVerses(query: string, k = 5) {
   const cursor = col.find({ embedding: { $exists: true } }) as any;
   const all = (await cursor.toArray()) as (Document & { embedding: number[]; ref: string; text: string })[];
 
-  // compute scores
+  // compute total scores
   const scored = all
     .map((v) => {
       const score = cosineSim(qEmbedding, v.embedding);
